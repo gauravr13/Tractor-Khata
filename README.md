@@ -7,12 +7,10 @@
 
 ---
 
-## 📱 For End Users / उपयोगकर्ताओं के लिए
+## 📱 For End Users
 
-**हिंदी में App की पूरी जानकारी चाहिए?**  
-👉 **[User Guide (Hindi) - ऐप की विस्तृत जानकारी](USER_GUIDE_HINDI.md)**
-
-_Looking for the complete app guide in Hindi? Click the link above!_
+Looking for a simple guide on how to use the app?  
+👉 **[User Guide - Complete App Documentation](USER_GUIDE.md)**
 
 ---
 
