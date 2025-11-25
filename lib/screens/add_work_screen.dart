@@ -291,7 +291,7 @@ class _AddWorkScreenState extends State<AddWorkScreen> with SingleTickerProvider
 
               // 2. Work Type
               DropdownButtonFormField<int>(
-                value: _selectedWorkTypeId,
+                initialValue: _selectedWorkTypeId,
                 decoration: InputDecoration(labelText: locale.translate('add_work.work_type_label'), prefixIcon: const Icon(Icons.work), border: const OutlineInputBorder()),
                 items: [
                   ...workProvider.workTypes.map((t) => DropdownMenuItem(value: t.id, child: Text(t.name))),

@@ -120,14 +120,22 @@ class WorkProvider with ChangeNotifier {
       // Sort by date descending
       _transactions.sort((a, b) {
         DateTime dateA;
-        if (a is Work) dateA = a.workDate;
-        else if (a is Payment) dateA = a.date;
-        else dateA = DateTime(0);
+        if (a is Work) {
+          dateA = a.workDate;
+        } else if (a is Payment) {
+          dateA = a.date;
+        } else {
+          dateA = DateTime(0);
+        }
 
         DateTime dateB;
-        if (b is Work) dateB = b.workDate;
-        else if (b is Payment) dateB = b.date;
-        else dateB = DateTime(0);
+        if (b is Work) {
+          dateB = b.workDate;
+        } else if (b is Payment) {
+          dateB = b.date;
+        } else {
+          dateB = DateTime(0);
+        }
 
         return dateB.compareTo(dateA);
       });

@@ -180,7 +180,6 @@ class _AddPaymentScreenState extends State<AddPaymentScreen> {
                           SnackBar(content: Text(locale.translate('farmer_profile.delete_payment_message'))),
                         );
                       }
-                      }
                     },
                     icon: const Icon(Icons.delete, color: Colors.red),
                     label: Text(locale.translate('common.delete'), style: const TextStyle(color: Colors.red, fontWeight: FontWeight.w600)),
