@@ -5,11 +5,20 @@
 **Platform:** Android  
 **License:** MIT
 
-A comprehensive work and payment management mobile application designed specifically for tractor drivers in India. The app is fully localized in Hindi and helps drivers efficiently manage farmer accounts, work records, payment tracking, and financial transactions.
+---
+
+## 📱 For End Users / उपयोगकर्ताओं के लिए
+
+**हिंदी में App की पूरी जानकारी चाहिए?**  
+👉 **[User Guide (Hindi) - ऐप की विस्तृत जानकारी](USER_GUIDE_HINDI.md)**
+
+_Looking for the complete app guide in Hindi? Click the link above!_
 
 ---
 
 ## 📱 Overview
+
+**Tractor Khata** is a comprehensive work and payment management mobile application designed specifically for tractor drivers in India. The app is fully localized in Hindi and helps drivers efficiently manage farmer accounts, work records, payment tracking, and financial transactions.
 
 **Tractor Khata** is a Flutter-based Android application that addresses the unique needs of tractor drivers who work with multiple farmers. The app provides an intuitive interface for:
 
