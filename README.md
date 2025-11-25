@@ -1,6 +1,6 @@
 # 🚜 Tractor Khata
 
-**Version:** 1.1.0  
+**Version:** 1.1.0 (Build 2025.11.25)  
 **Language:** Hindi (हिंदी)  
 **Platform:** Android  
 **License:** MIT
