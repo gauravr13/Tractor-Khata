@@ -253,7 +253,7 @@ class _AddWorkScreenState extends State<AddWorkScreen> with SingleTickerProvider
 
               // 2. Work Type
               DropdownButtonFormField<int>(
-                value: (_selectedWorkTypeId != null && 
+                initialValue: (_selectedWorkTypeId != null && 
                         (workProvider.workTypes.any((t) => t.id == _selectedWorkTypeId) || _selectedWorkTypeId == -1))
                     ? _selectedWorkTypeId 
                     : null,
