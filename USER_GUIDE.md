@@ -14,6 +14,23 @@
 2. Tap on the file to install.
 3. If prompted, allow installation from unknown sources.
 
+## ⚠️ IMPORTANT - Please Read
+
+### Data Loss Warning
+
+> **🚨 CRITICAL:** This app stores all data locally on your device. **Uninstalling the app will permanently delete all your data** including:
+> - All farmer records
+> - Work history
+> - Payment records
+> - Custom rate cards
+> 
+> **There is NO way to recover this data once the app is uninstalled.**
+> 
+> **Recommendation:** Take regular backups of important data by noting it down separately or taking screenshots.
+
+### Future Updates
+Cloud backup and data export features are planned for future versions.
+
 ## ✨ Key Features
 - **Bilingual Support**: Hindi & English
 - **Offline Database**: Secure local storage
