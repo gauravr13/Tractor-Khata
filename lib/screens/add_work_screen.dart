@@ -413,14 +413,15 @@ class _AddWorkScreenState extends State<AddWorkScreen> with SingleTickerProvider
                         ),
                       );
                       
-                      if (confirm == true && mounted) {
+                      if (confirm == true) {
+                        if (!mounted) return;
                         await Provider.of<WorkProvider>(context, listen: false).deleteWork(widget.workToEdit!);
-                        if (mounted) {
-                          Navigator.pop(context);
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text(locale.translate('farmer_profile.delete_work_message'))),
-                          );
-                        }
+                        
+                        if (!mounted) return;
+                        Navigator.pop(context);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text(locale.translate('farmer_profile.delete_work_message'))),
+                        );
                       }
                     },
                     icon: const Icon(Icons.delete, color: Colors.red),

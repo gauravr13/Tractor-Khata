@@ -50,7 +50,9 @@ class _LoginScreenState extends State<LoginScreen> {
       
       // Navigate to Home Screen (Farmer List)
       // Note: We use pushReplacementNamed to prevent going back to login screen
-      Navigator.pushReplacementNamed(context, '/farmer_list');
+      if (mounted) {
+        Navigator.pushReplacementNamed(context, '/farmer_list');
+      }
     } else {
       // Show error message if sign-in failed or was cancelled
       final locale = AppLocalizations.of(context)!;

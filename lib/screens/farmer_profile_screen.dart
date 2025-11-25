@@ -51,57 +51,13 @@ class _FarmerProfileScreenState extends State<FarmerProfileScreen> {
       ),
     );
 
-    if (confirm == true && mounted) {
+    if (confirm == true) {
+      if (!mounted) return;
       await Provider.of<FarmerProvider>(context, listen: false).deleteFarmer(farmer);
+      
       if (mounted) {
         Navigator.pop(context);
       }
-    }
-  }
-
-  Future<void> _deleteWork(BuildContext context, Work work) async {
-    final locale = AppLocalizations.of(context)!;
-    final confirm = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(locale.translate('farmer_profile.delete_work_title')),
-        content: Text(locale.translate('farmer_profile.delete_work_message')),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: Text(locale.translate('common.cancel')),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: Text(locale.translate('common.delete'), style: const TextStyle(color: Colors.red)),
-          ),
-        ],
-      ),
-    );
-
-    if (confirm == true) {
-      // ignore: use_build_context_synchronously
-      await Provider.of<WorkProvider>(context, listen: false).deleteWork(work);
-    }
-  }
-
-  Future<void> _deletePayment(BuildContext context, Payment payment) async {
-    final locale = AppLocalizations.of(context)!;
-    final confirm = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(locale.translate('farmer_profile.delete_payment_title')),
-        content: Text(locale.translate('farmer_profile.delete_payment_message')),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(context, false), child: Text(locale.translate('common.cancel'))),
-          TextButton(onPressed: () => Navigator.pop(context, true), child: Text(locale.translate('common.delete'), style: const TextStyle(color: Colors.red))),
-        ],
-      ),
-    );
-
-    if (confirm == true) {
-      // ignore: use_build_context_synchronously
-      await Provider.of<WorkProvider>(context, listen: false).deletePayment(payment);
     }
   }
 

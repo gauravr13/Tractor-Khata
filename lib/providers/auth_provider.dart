@@ -44,7 +44,7 @@ class AuthProvider with ChangeNotifier {
   /// ---------------------------------------------------------------------------
   /// Method: signInWithGoogle
   /// Purpose: Initiates the Google Sign-In flow.
-  /// Returns: Future<UserCredential?> (Null if cancelled or failed)
+  /// Returns: `Future<UserCredential?>` (Null if cancelled or failed)
   /// ---------------------------------------------------------------------------
   Future<UserCredential?> signInWithGoogle() async {
     try {

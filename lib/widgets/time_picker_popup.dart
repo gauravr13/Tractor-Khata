@@ -60,7 +60,7 @@ class _TimePickerPopupState extends State<TimePickerPopup> {
           borderRadius: BorderRadius.circular(28),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.15),
+              color: Colors.black.withValues(alpha: 0.15),
               blurRadius: 16,
               offset: const Offset(0, 4),
             ),
@@ -92,7 +92,7 @@ class _TimePickerPopupState extends State<TimePickerPopup> {
                     height: 50,
                     margin: const EdgeInsets.symmetric(horizontal: 16),
                     decoration: BoxDecoration(
-                      color: primaryColor.withOpacity(0.08),
+                      color: primaryColor.withValues(alpha: 0.08),
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
@@ -285,7 +285,7 @@ class _TimePickerPopupState extends State<TimePickerPopup> {
             color: isSelected ? primaryColor : Colors.transparent,
             borderRadius: BorderRadius.circular(8),
             boxShadow: isSelected
-                ? [BoxShadow(color: primaryColor.withOpacity(0.3), blurRadius: 4, offset: const Offset(0, 2))]
+                ? [BoxShadow(color: primaryColor.withValues(alpha: 0.3), blurRadius: 4, offset: const Offset(0, 2))]
                 : null,
           ),
           alignment: Alignment.center,

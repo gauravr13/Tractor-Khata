@@ -170,14 +170,16 @@ class _AddPaymentScreenState extends State<AddPaymentScreen> {
                         ),
                       );
                       
-                      if (confirm == true && mounted) {
+                      if (confirm == true) {
+                        if (!mounted) return;
                         await Provider.of<WorkProvider>(context, listen: false).deletePayment(widget.paymentToEdit!);
-                        if (mounted) {
-                          Navigator.pop(context);
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text(locale.translate('farmer_profile.delete_payment_message'))),
-                          );
-                        }
+                        
+                        if (!mounted) return;
+                        Navigator.pop(context);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text(locale.translate('farmer_profile.delete_payment_message'))),
+                        );
+                      }
                       }
                     },
                     icon: const Icon(Icons.delete, color: Colors.red),

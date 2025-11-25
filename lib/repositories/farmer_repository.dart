@@ -22,7 +22,7 @@ class FarmerRepository {
   /// ---------------------------------------------------------------------------
   /// Method: getAllFarmers
   /// Purpose: Retrieves a list of all farmers stored in the database.
-  /// Returns: Future<List<Farmer>>
+  /// Returns: `Future<List<Farmer>>`
   /// ---------------------------------------------------------------------------
   Future<List<Farmer>> getAllFarmers() {
     return _db.getAllFarmers();
@@ -31,7 +31,7 @@ class FarmerRepository {
   /// ---------------------------------------------------------------------------
   /// Method: getFarmerById
   /// Purpose: Retrieves a specific farmer by their unique ID.
-  /// Returns: Future<Farmer?> (Null if not found)
+  /// Returns: `Future<Farmer?>` (Null if not found)
   /// ---------------------------------------------------------------------------
   Future<Farmer?> getFarmerById(int id) {
     return _db.getFarmerById(id);
@@ -44,7 +44,7 @@ class FarmerRepository {
   /// - name: Name of the farmer (Required)
   /// - phone: Phone number (Optional)
   /// - notes: Additional notes (Optional)
-  /// Returns: Future<int> (The ID of the newly created farmer)
+  /// Returns: `Future<int>` (The ID of the newly created farmer)
   /// ---------------------------------------------------------------------------
   Future<int> addFarmer({
     required String name,
@@ -62,7 +62,7 @@ class FarmerRepository {
   /// ---------------------------------------------------------------------------
   /// Method: updateFarmer
   /// Purpose: Updates an existing farmer's details.
-  /// Returns: Future<bool> (True if successful)
+  /// Returns: `Future<bool>` (True if successful)
   /// ---------------------------------------------------------------------------
   Future<bool> updateFarmer(Farmer farmer) {
     return _db.updateFarmer(farmer);
@@ -71,7 +71,7 @@ class FarmerRepository {
   /// ---------------------------------------------------------------------------
   /// Method: deleteFarmer
   /// Purpose: Deletes a farmer record from the database.
-  /// Returns: Future<int> (Number of rows affected)
+  /// Returns: `Future<int>` (Number of rows affected)
   /// ---------------------------------------------------------------------------
   Future<int> deleteFarmer(Farmer farmer) {
     return _db.deleteFarmer(farmer);
@@ -80,7 +80,7 @@ class FarmerRepository {
   /// ---------------------------------------------------------------------------
   /// Method: searchFarmers
   /// Purpose: Searches for farmers by name or phone number.
-  /// Returns: Future<List<Farmer>> (List of matching farmers)
+  /// Returns: `Future<List<Farmer>>` (List of matching farmers)
   /// ---------------------------------------------------------------------------
   Future<List<Farmer>> searchFarmers(String query) {
     return _db.searchFarmers(query);
