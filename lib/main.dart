@@ -41,6 +41,9 @@ import 'screens/settings_screen.dart';
 import 'screens/rate_card_screen.dart';
 import 'screens/add_work_type_screen.dart';
 
+// --- Utils Imports ---
+import 'utils/custom_page_transition.dart';
+
 /// ---------------------------------------------------------------------------
 /// Main Function
 /// ---------------------------------------------------------------------------
@@ -141,8 +144,8 @@ class TractorKhataApp extends StatelessWidget {
             // Optimize Page Transitions
             pageTransitionsTheme: const PageTransitionsTheme(
               builders: {
-                TargetPlatform.android: ZoomPageTransitionsBuilder(),
-                TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
+                TargetPlatform.android: ScaleFadePageTransitionsBuilder(),
+                TargetPlatform.iOS: ScaleFadePageTransitionsBuilder(),
               },
             ),
             

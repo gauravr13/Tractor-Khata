@@ -262,8 +262,8 @@ class _TimePickerPopupState extends State<TimePickerPopup> {
       ),
       child: Row(
         children: [
-          _buildSegmentOption(locale.translate('time_picker.am'), 'AM', primaryColor),
-          _buildSegmentOption(locale.translate('time_picker.pm'), 'PM', primaryColor),
+          _buildSegmentOption('AM', 'AM', primaryColor),
+          _buildSegmentOption('PM', 'PM', primaryColor),
         ],
       ),
     );

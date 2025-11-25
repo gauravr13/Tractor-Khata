@@ -41,34 +41,14 @@ class _AddWorkScreenState extends State<AddWorkScreen> with SingleTickerProvider
   TimeOfDay? _endTime;
   
   // Display Helpers
-  String _totalTimeText = '';
   bool _isSaving = false;
   
-  late AnimationController _animationController;
-  late Animation<double> _fadeAnimation;
-
   @override
   void initState() {
     super.initState();
-    _animationController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 300),
-    );
-    _fadeAnimation = CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.easeInOut,
-    );
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      Provider.of<WorkProvider>(context, listen: false).loadWorkTypes();
-      _initializeForEdit();
-    });
-  }
-
-  void _initializeForEdit() {
-    if (widget.workToEdit == null) return;
-    final work = widget.workToEdit!;
-    setState(() {
+    if (widget.workToEdit != null) {
+      final work = widget.workToEdit!;
       _selectedDate = work.workDate;
       _startTime = TimeOfDay.fromDateTime(work.startTime);
       _endTime = TimeOfDay.fromDateTime(work.endTime);
@@ -84,7 +64,10 @@ class _AddWorkScreenState extends State<AddWorkScreen> with SingleTickerProvider
         _isCustomWork = true;
         _customWorkNameController.text = work.customWorkName ?? '';
       }
-      _calculateTotalTime();
+    }
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<WorkProvider>(context, listen: false).loadWorkTypes();
     });
   }
 
@@ -94,7 +77,6 @@ class _AddWorkScreenState extends State<AddWorkScreen> with SingleTickerProvider
     _rateController.dispose();
     _amountController.dispose();
     _notesController.dispose();
-    _animationController.dispose();
     super.dispose();
   }
 
@@ -108,12 +90,8 @@ class _AddWorkScreenState extends State<AddWorkScreen> with SingleTickerProvider
   }
 
   void _calculateTotalTime() {
-    final locale = AppLocalizations.of(context)!;
     if (_startTime == null || _endTime == null) {
-      setState(() {
-        _totalTimeText = '';
-        _amountController.text = '';
-      });
+      _amountController.text = '';
       return;
     }
 
@@ -126,22 +104,6 @@ class _AddWorkScreenState extends State<AddWorkScreen> with SingleTickerProvider
     }
 
     final durationInMinutes = end.difference(start).inMinutes;
-    final hours = durationInMinutes ~/ 60;
-    final minutes = durationInMinutes % 60;
-
-    setState(() {
-      if (hours > 0 && minutes > 0) {
-        _totalTimeText = '${locale.translate('add_work.total_time')}: $hours ${locale.translate('add_work.hours')} $minutes ${locale.translate('add_work.minutes')}';
-      } else if (hours > 0) {
-        _totalTimeText = '${locale.translate('add_work.total_time')}: $hours ${locale.translate('add_work.hours')}';
-      } else if (minutes > 0) {
-        _totalTimeText = '${locale.translate('add_work.total_time')}: $minutes ${locale.translate('add_work.minutes')}';
-      } else {
-        _totalTimeText = '';
-      }
-      if (_totalTimeText.isNotEmpty) _animationController.forward();
-    });
-
     _calculateTotalAmount(durationInMinutes);
   }
 
@@ -291,8 +253,16 @@ class _AddWorkScreenState extends State<AddWorkScreen> with SingleTickerProvider
 
               // 2. Work Type
               DropdownButtonFormField<int>(
-                initialValue: _selectedWorkTypeId,
-                decoration: InputDecoration(labelText: locale.translate('add_work.work_type_label'), prefixIcon: const Icon(Icons.work), border: const OutlineInputBorder()),
+                value: (_selectedWorkTypeId != null && 
+                        (workProvider.workTypes.any((t) => t.id == _selectedWorkTypeId) || _selectedWorkTypeId == -1))
+                    ? _selectedWorkTypeId 
+                    : null,
+                decoration: InputDecoration(
+                  labelText: locale.translate('add_work.work_type_label'), 
+                  prefixIcon: const Icon(Icons.work), 
+                  border: const OutlineInputBorder(),
+                  floatingLabelBehavior: FloatingLabelBehavior.always,
+                ),
                 items: [
                   ...workProvider.workTypes.map((t) => DropdownMenuItem(value: t.id, child: Text(t.name))),
                   DropdownMenuItem(value: -1, child: Text('+ ${locale.translate('add_work.custom_work_name')}')),
@@ -322,7 +292,12 @@ class _AddWorkScreenState extends State<AddWorkScreen> with SingleTickerProvider
               if (_isCustomWork) ...[
                 TextFormField(
                   controller: _customWorkNameController,
-                  decoration: InputDecoration(labelText: locale.translate('add_work.custom_work_name'), prefixIcon: const Icon(Icons.edit), border: const OutlineInputBorder()),
+                  decoration: InputDecoration(
+                    labelText: locale.translate('add_work.custom_work_name'), 
+                    prefixIcon: const Icon(Icons.edit), 
+                    border: const OutlineInputBorder(),
+                    floatingLabelBehavior: FloatingLabelBehavior.always,
+                  ),
                   validator: (val) => _isCustomWork && (val == null || val.trim().isEmpty) ? locale.translate('add_work.enter_custom_name_error') : null,
                 ),
                 const SizedBox(height: 16),
@@ -337,21 +312,56 @@ class _AddWorkScreenState extends State<AddWorkScreen> with SingleTickerProvider
               const SizedBox(height: 16),
 
               // 5. Total Time
-              if (_totalTimeText.isNotEmpty)
-                FadeTransition(
-                  opacity: _fadeAnimation,
-                  child: Container(
-                    padding: const EdgeInsets.all(14),
-                    decoration: BoxDecoration(color: Colors.green.shade50, borderRadius: BorderRadius.circular(8), border: Border.all(color: Colors.green.shade300)),
-                    child: Row(children: [const Icon(Icons.timer, color: Colors.green), const SizedBox(width: 10), Text(_totalTimeText, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.green.shade800))]),
-                  ),
-                ),
-              if (_totalTimeText.isNotEmpty) const SizedBox(height: 16),
+              // 5. Total Time
+              Builder(
+                builder: (context) {
+                  String totalTimeText = '${locale.translate('add_work.total_time')}: --';
+                  
+                  if (_startTime != null && _endTime != null) {
+                    final now = DateTime.now();
+                    final start = DateTime(now.year, now.month, now.day, _startTime!.hour, _startTime!.minute);
+                    var end = DateTime(now.year, now.month, now.day, _endTime!.hour, _endTime!.minute);
+
+                    if (end.isBefore(start)) {
+                      end = end.add(const Duration(days: 1));
+                    }
+
+                    final durationInMinutes = end.difference(start).inMinutes;
+                    final hours = durationInMinutes ~/ 60;
+                    final minutes = durationInMinutes % 60;
+                    
+                    if (hours > 0 && minutes > 0) {
+                      totalTimeText = '${locale.translate('add_work.total_time')}: $hours ${locale.translate('add_work.hours')} $minutes ${locale.translate('add_work.minutes')}';
+                    } else if (hours > 0) {
+                      totalTimeText = '${locale.translate('add_work.total_time')}: $hours ${locale.translate('add_work.hours')}';
+                    } else if (minutes > 0) {
+                      totalTimeText = '${locale.translate('add_work.total_time')}: $minutes ${locale.translate('add_work.minutes')}';
+                    }
+                  }
+
+                  return Column(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(14),
+                        decoration: BoxDecoration(color: Colors.green.shade50, borderRadius: BorderRadius.circular(8), border: Border.all(color: Colors.green.shade300)),
+                        child: Row(children: [const Icon(Icons.timer, color: Colors.green), const SizedBox(width: 10), Text(totalTimeText, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.green.shade800))]),
+                      ),
+                      const SizedBox(height: 16),
+                    ],
+                  );
+                }
+              ),
 
               // 6. Rate
               TextFormField(
                 controller: _rateController,
-                decoration: InputDecoration(labelText: locale.translate('add_work.rate_per_hour'), prefixIcon: const Icon(Icons.currency_rupee), prefixText: '₹ ', border: const OutlineInputBorder()),
+                decoration: InputDecoration(
+                  labelText: locale.translate('add_work.rate_per_hour'), 
+                  prefixIcon: const Icon(Icons.currency_rupee), 
+                  prefixText: '₹ ', 
+                  border: const OutlineInputBorder(),
+                  floatingLabelBehavior: FloatingLabelBehavior.always,
+                ),
                 keyboardType: TextInputType.number,
                 inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                 onChanged: (_) {
@@ -364,7 +374,15 @@ class _AddWorkScreenState extends State<AddWorkScreen> with SingleTickerProvider
               // 7. Amount
               TextFormField(
                 controller: _amountController,
-                decoration: InputDecoration(labelText: locale.translate('add_work.total_amount'), prefixIcon: const Icon(Icons.account_balance_wallet), prefixText: '₹ ', border: const OutlineInputBorder(), filled: true, fillColor: const Color(0xFFE8F5E9)),
+                decoration: InputDecoration(
+                  labelText: locale.translate('add_work.total_amount'), 
+                  prefixIcon: const Icon(Icons.account_balance_wallet), 
+                  prefixText: '₹ ', 
+                  border: const OutlineInputBorder(), 
+                  filled: true, 
+                  fillColor: const Color(0xFFE8F5E9),
+                  floatingLabelBehavior: FloatingLabelBehavior.always,
+                ),
                 keyboardType: TextInputType.number,
                 style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 18, color: Colors.green),
               ),
@@ -373,7 +391,12 @@ class _AddWorkScreenState extends State<AddWorkScreen> with SingleTickerProvider
               // 8. Notes
               TextFormField(
                 controller: _notesController,
-                decoration: InputDecoration(labelText: locale.translate('add_work.notes'), prefixIcon: const Icon(Icons.note), border: const OutlineInputBorder()),
+                decoration: InputDecoration(
+                  labelText: locale.translate('add_work.notes'), 
+                  prefixIcon: const Icon(Icons.note), 
+                  border: const OutlineInputBorder(),
+                  floatingLabelBehavior: FloatingLabelBehavior.always,
+                ),
                 maxLines: 3,
               ),
               const SizedBox(height: 24),
