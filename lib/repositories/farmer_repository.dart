@@ -1,28 +1,51 @@
+/// =============================================================================
+/// PROJECT: Tractor Khata
+/// FILE: farmer_repository.dart
+/// DESCRIPTION:
+/// This repository handles all data operations related to Farmers.
+/// It acts as an abstraction layer between the UI/Providers and the Database.
+/// =============================================================================
+
 import 'package:drift/drift.dart';
 import '../database/database.dart';
 
-/// Repository class for managing Farmer data.
-/// This class abstracts the database operations for Farmers.
+/// ---------------------------------------------------------------------------
+/// Class: FarmerRepository
+/// Purpose: Manages CRUD operations for Farmer entities.
+/// ---------------------------------------------------------------------------
 class FarmerRepository {
   final AppDatabase _db;
 
-  /// Constructor requiring the [AppDatabase] instance.
+  /// Constructor: Requires an instance of AppDatabase
   FarmerRepository(this._db);
 
-  /// Retrieves all farmers from the database.
-  /// Returns a list of [Farmer] objects.
+  /// ---------------------------------------------------------------------------
+  /// Method: getAllFarmers
+  /// Purpose: Retrieves a list of all farmers stored in the database.
+  /// Returns: Future<List<Farmer>>
+  /// ---------------------------------------------------------------------------
   Future<List<Farmer>> getAllFarmers() {
     return _db.getAllFarmers();
   }
 
-  /// Retrieves a single farmer by their ID.
+  /// ---------------------------------------------------------------------------
+  /// Method: getFarmerById
+  /// Purpose: Retrieves a specific farmer by their unique ID.
+  /// Returns: Future<Farmer?> (Null if not found)
+  /// ---------------------------------------------------------------------------
   Future<Farmer?> getFarmerById(int id) {
     return _db.getFarmerById(id);
   }
 
-  /// Adds a new farmer to the database.
-  /// [name] is required. [phone] and [notes] are optional.
-  /// Returns the ID of the newly created farmer.
+  /// ---------------------------------------------------------------------------
+  /// Method: addFarmer
+  /// Purpose: Creates a new farmer record.
+  /// Parameters:
+  /// - name: Name of the farmer (Required)
+  /// - phone: Phone number (Optional)
+  /// - notes: Additional notes (Optional)
+  /// Returns: Future<int> (The ID of the newly created farmer)
+  /// ---------------------------------------------------------------------------
   Future<int> addFarmer({
     required String name,
     String? phone,
@@ -36,18 +59,29 @@ class FarmerRepository {
     return _db.insertFarmer(companion);
   }
 
-  /// Updates an existing farmer's details.
-  /// [farmer] is the updated Farmer object.
+  /// ---------------------------------------------------------------------------
+  /// Method: updateFarmer
+  /// Purpose: Updates an existing farmer's details.
+  /// Returns: Future<bool> (True if successful)
+  /// ---------------------------------------------------------------------------
   Future<bool> updateFarmer(Farmer farmer) {
     return _db.updateFarmer(farmer);
   }
 
-  /// Deletes a farmer from the database.
+  /// ---------------------------------------------------------------------------
+  /// Method: deleteFarmer
+  /// Purpose: Deletes a farmer record from the database.
+  /// Returns: Future<int> (Number of rows affected)
+  /// ---------------------------------------------------------------------------
   Future<int> deleteFarmer(Farmer farmer) {
     return _db.deleteFarmer(farmer);
   }
 
-  /// Searches for farmers by name or phone number.
+  /// ---------------------------------------------------------------------------
+  /// Method: searchFarmers
+  /// Purpose: Searches for farmers by name or phone number.
+  /// Returns: Future<List<Farmer>> (List of matching farmers)
+  /// ---------------------------------------------------------------------------
   Future<List<Farmer>> searchFarmers(String query) {
     return _db.searchFarmers(query);
   }

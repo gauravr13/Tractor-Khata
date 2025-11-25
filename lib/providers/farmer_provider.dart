@@ -1,27 +1,43 @@
+/// =============================================================================
+/// PROJECT: Tractor Khata
+/// FILE: farmer_provider.dart
+/// DESCRIPTION:
+/// This provider manages the state of Farmer data.
+/// It interacts with the FarmerRepository to fetch, add, update, and delete farmers.
+/// It notifies listeners (UI) whenever the state changes.
+/// =============================================================================
+
 import 'package:flutter/foundation.dart';
 import '../database/database.dart';
 import '../repositories/farmer_repository.dart';
 
-/// Provider class for managing Farmer state.
-/// Acts as a bridge between the UI and the FarmerRepository.
+/// ---------------------------------------------------------------------------
+/// Class: FarmerProvider
+/// Purpose: State management for Farmer data.
+/// ---------------------------------------------------------------------------
 class FarmerProvider with ChangeNotifier {
   final FarmerRepository _repository;
 
+  // Internal state
   List<Farmer> _farmers = [];
   bool _isLoading = false;
 
-  /// Returns the list of farmers.
+  /// Returns the list of loaded farmers
   List<Farmer> get farmers => _farmers;
 
-  /// Returns the loading state.
+  /// Returns true if data is currently being loaded
   bool get isLoading => _isLoading;
 
+  /// Constructor: Requires FarmerRepository dependency
   FarmerProvider(this._repository);
 
-  /// Loads all farmers from the database.
+  /// ---------------------------------------------------------------------------
+  /// Method: loadFarmers
+  /// Purpose: Fetches all farmers from the repository and updates the state.
+  /// ---------------------------------------------------------------------------
   Future<void> loadFarmers() async {
     _isLoading = true;
-    notifyListeners();
+    notifyListeners(); // Notify UI to show loading indicator
 
     try {
       _farmers = await _repository.getAllFarmers();
@@ -31,35 +47,48 @@ class FarmerProvider with ChangeNotifier {
       }
     } finally {
       _isLoading = false;
-      notifyListeners();
+      notifyListeners(); // Notify UI to show data
     }
   }
 
-  /// Adds a new farmer.
+  /// ---------------------------------------------------------------------------
+  /// Method: addFarmer
+  /// Purpose: Adds a new farmer and refreshes the list.
+  /// ---------------------------------------------------------------------------
   Future<void> addFarmer({
     required String name,
     String? phone,
     String? notes,
   }) async {
     await _repository.addFarmer(name: name, phone: phone, notes: notes);
-    await loadFarmers(); // Refresh the list
+    await loadFarmers(); // Refresh list to include new farmer
   }
 
-  /// Updates an existing farmer.
+  /// ---------------------------------------------------------------------------
+  /// Method: updateFarmer
+  /// Purpose: Updates an existing farmer and refreshes the list.
+  /// ---------------------------------------------------------------------------
   Future<void> updateFarmer(Farmer farmer) async {
     await _repository.updateFarmer(farmer);
-    await loadFarmers(); // Refresh the list
+    await loadFarmers(); // Refresh list to reflect changes
   }
 
-  /// Deletes a farmer.
+  /// ---------------------------------------------------------------------------
+  /// Method: deleteFarmer
+  /// Purpose: Deletes a farmer and refreshes the list.
+  /// ---------------------------------------------------------------------------
   Future<void> deleteFarmer(Farmer farmer) async {
     await _repository.deleteFarmer(farmer);
-    await loadFarmers(); // Refresh the list
+    await loadFarmers(); // Refresh list to remove deleted farmer
   }
 
-  /// Searches farmers by query.
+  /// ---------------------------------------------------------------------------
+  /// Method: searchFarmers
+  /// Purpose: Filters the farmer list based on a search query.
+  /// ---------------------------------------------------------------------------
   Future<void> searchFarmers(String query) async {
     if (query.isEmpty) {
+      // If query is empty, load all farmers
       await loadFarmers();
     } else {
       _isLoading = true;

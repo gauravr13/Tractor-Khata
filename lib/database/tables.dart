@@ -1,98 +1,124 @@
+/// =============================================================================
+/// PROJECT: Tractor Khata
+/// FILE: tables.dart
+/// DESCRIPTION:
+/// This file defines the database schema using the Drift package.
+/// It contains the table definitions for:
+/// 1. Farmers: Stores farmer profiles.
+/// 2. WorkTypes: Stores rate card items (e.g., Plowing, Sowing).
+/// 3. Works: Stores individual work records linked to farmers.
+/// 4. Payments: Stores payment records linked to farmers.
+/// =============================================================================
+
 import 'package:drift/drift.dart';
 
-// This file defines the database tables for the Tractor Khata app.
-// It uses the Drift package to generate the database code.
-
-/// Table to store farmer details.
-/// This table holds the personal information of the farmers.
+/// ---------------------------------------------------------------------------
+/// Table: Farmers
+/// Description: Stores personal details of farmers/clients.
+/// ---------------------------------------------------------------------------
 class Farmers extends Table {
-  /// Unique identifier for the farmer. Auto-incremented.
+  /// Unique identifier (Primary Key, Auto-increment)
   IntColumn get id => integer().autoIncrement()();
 
-  /// Name of the farmer. Required.
+  /// Farmer's Name (Required)
   TextColumn get name => text()();
 
-  /// Phone number of the farmer. Optional.
+  /// Farmer's Phone Number (Optional)
   TextColumn get phone => text().nullable()();
 
-  /// Additional notes about the farmer. Optional.
+  /// Additional Notes (Optional)
   TextColumn get notes => text().nullable()();
 
-  /// Date and time when this record was created.
+  /// Record Creation Timestamp (Default: Current Time)
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
 
-  /// Date and time when this record was last updated.
+  /// Record Update Timestamp (Default: Current Time)
   DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
 }
 
-/// Table to store work types (Rate Card).
-/// This defines the different types of work (e.g., Jutai, Rotavator) and their default rates.
+/// ---------------------------------------------------------------------------
+/// Table: WorkTypes
+/// Description: Stores the Rate Card items (Predefined work types with rates).
+/// ---------------------------------------------------------------------------
 class WorkTypes extends Table {
-  /// Unique identifier for the work type. Auto-incremented.
+  /// Unique identifier (Primary Key, Auto-increment)
   IntColumn get id => integer().autoIncrement()();
 
-  /// Name of the work type (e.g., "Jutai"). Required.
+  /// Name of the work (e.g., "Jutai", "Rotavator")
   TextColumn get name => text()();
 
-  /// Default rate per hour for this work type. Required.
+  /// Default Rate per Hour for this work type
   RealColumn get ratePerHour => real()();
 
-  /// Date and time when this record was created.
+  /// Record Creation Timestamp
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
 
-  /// Date and time when this record was last updated.
+  /// Record Update Timestamp
   DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
 }
 
-/// Table to store work entries.
-/// This records the actual work done for a farmer.
+/// ---------------------------------------------------------------------------
+/// Table: Works
+/// Description: Stores the actual work done for a farmer.
+/// Links to [Farmers] and optionally [WorkTypes].
+/// ---------------------------------------------------------------------------
 class Works extends Table {
-  /// Unique identifier for the work entry. Auto-incremented.
+  /// Unique identifier (Primary Key, Auto-increment)
   IntColumn get id => integer().autoIncrement()();
 
-  /// Foreign key linking to the [Farmers] table.
-  /// Identifies which farmer this work belongs to.
+  /// Foreign Key: Links to the Farmer who owns this work
   IntColumn get farmerId => integer().references(Farmers, #id)();
 
-  /// Foreign key linking to the [WorkTypes] table.
-  /// Optional, because the user might enter a custom work name.
+  /// Foreign Key: Links to a WorkType (Optional)
+  /// Nullable because users can enter a custom work name without a predefined type.
   IntColumn get workTypeId => integer().nullable().references(WorkTypes, #id)();
 
-  /// Custom name for the work if not selected from [WorkTypes].
-  /// This is used when 'Write your own work name' is selected.
+  /// Custom Work Name (Used if workTypeId is null)
   TextColumn get customWorkName => text().nullable()();
 
-  /// The time when the work started.
+  /// Work Start Time
   DateTimeColumn get startTime => dateTime()();
 
-  /// The time when the work ended.
+  /// Work End Time
   DateTimeColumn get endTime => dateTime()();
 
-  /// The total duration of the work in minutes.
-  /// Calculated as (endTime - startTime).
+  /// Duration in Minutes (Calculated: endTime - startTime)
   IntColumn get durationInMinutes => integer()();
 
-  /// The rate charged per hour for this specific work entry.
+  /// Rate Charged Per Hour for this specific job
   RealColumn get ratePerHour => real()();
 
-  /// The total amount for this work entry.
-  /// Calculated as (durationInHours * ratePerHour).
+  /// Total Amount (Calculated: Duration * Rate)
   RealColumn get totalAmount => real()();
 
-  /// The date when the work was performed.
-  /// Usually the same as startTime, but stored separately for easier filtering by date.
+  /// Date of Work (Stored separately for easier filtering)
   DateTimeColumn get workDate => dateTime()();
 
-  /// Additional notes about this specific work entry.
+  /// Additional Notes for this work
   TextColumn get notes => text().nullable()();
 }
 
-/// Table to store payments received from farmers.
+/// ---------------------------------------------------------------------------
+/// Table: Payments
+/// Description: Stores payments received from farmers.
+/// Links to [Farmers].
+/// ---------------------------------------------------------------------------
 class Payments extends Table {
+  /// Unique identifier (Primary Key, Auto-increment)
   IntColumn get id => integer().autoIncrement()();
+
+  /// Foreign Key: Links to the Farmer who made the payment
   IntColumn get farmerId => integer().references(Farmers, #id)();
+
+  /// Amount Received
   RealColumn get amount => real()();
+
+  /// Date of Payment
   DateTimeColumn get date => dateTime()();
+
+  /// Additional Notes (e.g., "Cash", "UPI")
   TextColumn get notes => text().nullable()();
+
+  /// Record Creation Timestamp
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
 }

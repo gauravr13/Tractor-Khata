@@ -1,12 +1,21 @@
+/// =============================================================================
+/// PROJECT: Tractor Khata
+/// FILE: login_screen.dart
+/// DESCRIPTION:
+/// This screen handles user authentication via Google Sign-In.
+/// It is the first screen shown to unauthenticated users.
+/// =============================================================================
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
 import '../services/localization_service.dart';
-
 import '../providers/driver_provider.dart';
 
-/// Login Screen.
-/// Provides Google Sign-In functionality.
+/// ---------------------------------------------------------------------------
+/// Screen: LoginScreen
+/// Purpose: Displays the login UI and handles the sign-in flow.
+/// ---------------------------------------------------------------------------
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
@@ -17,7 +26,10 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   bool _isLoading = false;
 
-  /// Handles the Google Sign-In process.
+  /// ---------------------------------------------------------------------------
+  /// Method: _handleGoogleSignIn
+  /// Purpose: Initiates Google Sign-In and navigates to home on success.
+  /// ---------------------------------------------------------------------------
   Future<void> _handleGoogleSignIn() async {
     setState(() {
       _isLoading = true;
@@ -33,11 +45,14 @@ class _LoginScreenState extends State<LoginScreen> {
     });
 
     if (credential != null) {
-      // Sync driver profile with Google user
+      // Sync driver profile with Google user data (Name, Email, Photo)
       await Provider.of<DriverProvider>(context, listen: false).syncWithGoogle(credential.user);
-      // Navigate to Home Screen on success
-      Navigator.pushReplacementNamed(context, '/home');
+      
+      // Navigate to Home Screen (Farmer List)
+      // Note: We use pushReplacementNamed to prevent going back to login screen
+      Navigator.pushReplacementNamed(context, '/farmer_list');
     } else {
+      // Show error message if sign-in failed or was cancelled
       final locale = AppLocalizations.of(context)!;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -51,6 +66,7 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     final locale = AppLocalizations.of(context)!;
+    
     return Scaffold(
       body: Center(
         child: Padding(
@@ -58,7 +74,7 @@ class _LoginScreenState extends State<LoginScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // App Logo
+              // --- App Logo ---
               ClipRRect(
                 borderRadius: BorderRadius.circular(24),
                 child: Image.asset(
@@ -69,6 +85,8 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
               ),
               const SizedBox(height: 24),
+              
+              // --- Welcome Text ---
               Text(
                 locale.translate('login.welcome'),
                 textAlign: TextAlign.center,
@@ -79,6 +97,8 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
               ),
               const SizedBox(height: 48),
+              
+              // --- Sign In Button ---
               if (_isLoading)
                 const CircularProgressIndicator()
               else
@@ -94,6 +114,9 @@ class _LoginScreenState extends State<LoginScreen> {
                       foregroundColor: Colors.black87,
                       elevation: 2,
                       side: const BorderSide(color: Colors.grey),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                     ),
                   ),
                 ),

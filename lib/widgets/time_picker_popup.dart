@@ -1,13 +1,23 @@
+/// =============================================================================
+/// PROJECT: Tractor Khata
+/// FILE: time_picker_popup.dart
+/// DESCRIPTION:
+/// A custom, modern 12-hour time picker widget.
+/// Features:
+/// 1. iOS-style scroll wheels for Hour and Minute selection.
+/// 2. Segmented control for AM/PM toggling.
+/// 3. Smooth animations and haptic feedback for better UX.
+/// 4. Localized labels (AM/PM, Select Time, etc.).
+/// =============================================================================
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../services/localization_service.dart';
 
-/// A premium, modern 12-hour time picker popup.
-/// Features:
-/// - iOS-style scroll wheels for Hour and Minute
-/// - Segmented control for AM/PM
-/// - Clean, spacious layout with rounded corners
-/// - Smooth animations and haptic feedback
+/// ---------------------------------------------------------------------------
+/// Widget: TimePickerPopup
+/// Purpose: Displays a dialog for selecting time (Hour, Minute, AM/PM).
+/// ---------------------------------------------------------------------------
 class TimePickerPopup extends StatefulWidget {
   final TimeOfDay? initialTime;
 
@@ -25,8 +35,11 @@ class _TimePickerPopupState extends State<TimePickerPopup> {
   @override
   void initState() {
     super.initState();
+    // Initialize with provided time or current time
     final now = TimeOfDay.now();
     final init = widget.initialTime ?? now;
+    
+    // Convert 24h format to 12h format for the UI
     _hour = init.hourOfPeriod == 0 ? 12 : init.hourOfPeriod;
     _minute = init.minute;
     _period = init.period == DayPeriod.am ? 'AM' : 'PM';
@@ -48,7 +61,7 @@ class _TimePickerPopupState extends State<TimePickerPopup> {
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.15),
-              blurRadius: 16, // Reduced blur for performance
+              blurRadius: 16,
               offset: const Offset(0, 4),
             ),
           ],
@@ -57,7 +70,7 @@ class _TimePickerPopupState extends State<TimePickerPopup> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // 1. Title
+            // --- Title ---
             Text(
               locale.translate('time_picker.select_time'),
               style: theme.textTheme.headlineSmall?.copyWith(
@@ -68,13 +81,13 @@ class _TimePickerPopupState extends State<TimePickerPopup> {
             ),
             const SizedBox(height: 32),
 
-            // 2. Wheel Pickers (Hour : Minute)
+            // --- Wheel Pickers (Hour : Minute) ---
             SizedBox(
               height: 160,
               child: Stack(
                 alignment: Alignment.center,
                 children: [
-                  // Highlight Bar
+                  // Highlight Bar (Selection Indicator)
                   Container(
                     height: 50,
                     margin: const EdgeInsets.symmetric(horizontal: 16),
@@ -83,7 +96,7 @@ class _TimePickerPopupState extends State<TimePickerPopup> {
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
-                  // Wheels
+                  // Wheels Row
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -95,7 +108,7 @@ class _TimePickerPopupState extends State<TimePickerPopup> {
                         onChanged: (val) => setState(() => _hour = val),
                         width: 70,
                       ),
-                      // Separator
+                      // Separator Colon
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 8),
                         child: Text(
@@ -124,11 +137,11 @@ class _TimePickerPopupState extends State<TimePickerPopup> {
             ),
             const SizedBox(height: 24),
 
-            // 3. AM/PM Segment
+            // --- AM/PM Segment Control ---
             _buildAmPmSegment(primaryColor, locale),
             const SizedBox(height: 32),
 
-            // 4. Action Buttons
+            // --- Action Buttons (Cancel / OK) ---
             _buildActionButtons(context, primaryColor, locale),
           ],
         ),
@@ -136,10 +149,11 @@ class _TimePickerPopupState extends State<TimePickerPopup> {
     );
   }
 
-  /// Action Buttons (Cancel / OK)
+  /// Helper: Builds the Action Buttons Row
   Widget _buildActionButtons(BuildContext context, Color primaryColor, AppLocalizations locale) {
     return Row(
       children: [
+        // Cancel Button
         Expanded(
           child: TextButton(
             onPressed: () {
@@ -158,10 +172,12 @@ class _TimePickerPopupState extends State<TimePickerPopup> {
           ),
         ),
         const SizedBox(width: 16),
+        // OK Button
         Expanded(
           child: ElevatedButton(
             onPressed: () {
               HapticFeedback.heavyImpact();
+              // Convert back to TimeOfDay (24h format)
               final time = TimeOfDay(
                 hour: _period == 'AM'
                     ? (_hour == 12 ? 0 : _hour)
@@ -186,7 +202,7 @@ class _TimePickerPopupState extends State<TimePickerPopup> {
     );
   }
 
-  /// Scrollable Wheel Widget
+  /// Helper: Builds a scrollable wheel for numbers
   Widget _buildWheel({
     required int min,
     required int max,
@@ -200,8 +216,8 @@ class _TimePickerPopupState extends State<TimePickerPopup> {
       height: 160,
       child: ListWheelScrollView.useDelegate(
         itemExtent: 50,
-        perspective: 0.002, // Reduced perspective for performance
-        diameterRatio: 1.5, // Flatter for better visibility
+        perspective: 0.002, // Slight 3D effect
+        diameterRatio: 1.5,
         physics: const FixedExtentScrollPhysics(),
         useMagnifier: true,
         magnification: 1.1,
@@ -216,9 +232,9 @@ class _TimePickerPopupState extends State<TimePickerPopup> {
             final isSelected = val == current;
             return Center(
               child: AnimatedDefaultTextStyle(
-                duration: const Duration(milliseconds: 150), // Faster animation
+                duration: const Duration(milliseconds: 150),
                 style: TextStyle(
-                  fontSize: isSelected ? 26 : 20, // Slightly smaller
+                  fontSize: isSelected ? 26 : 20,
                   fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
                   color: isSelected ? Theme.of(context).primaryColor : Colors.grey.shade300,
                 ),
@@ -234,7 +250,7 @@ class _TimePickerPopupState extends State<TimePickerPopup> {
     );
   }
 
-  /// AM/PM Segmented Control
+  /// Helper: Builds the AM/PM toggle switch
   Widget _buildAmPmSegment(Color primaryColor, AppLocalizations locale) {
     return Container(
       height: 48,
@@ -253,6 +269,7 @@ class _TimePickerPopupState extends State<TimePickerPopup> {
     );
   }
 
+  /// Helper: Builds a single option in the AM/PM segment
   Widget _buildSegmentOption(String label, String value, Color primaryColor) {
     final isSelected = _period == value;
     return Expanded(

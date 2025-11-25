@@ -1,16 +1,29 @@
+/// =============================================================================
+/// PROJECT: Tractor Khata
+/// FILE: work_repository.dart
+/// DESCRIPTION:
+/// This repository handles all data operations related to:
+/// 1. Work Entries (Recording work done)
+/// 2. Work Types (Rate Card management)
+/// 3. Payments (Recording payments received)
+/// =============================================================================
+
 import 'package:drift/drift.dart';
 import '../database/database.dart';
 
-/// Repository class for managing Work entries and Rate Card (Work Types).
+/// ---------------------------------------------------------------------------
+/// Class: WorkRepository
+/// Purpose: Manages CRUD operations for Work, WorkType, and Payment entities.
+/// ---------------------------------------------------------------------------
 class WorkRepository {
   final AppDatabase _db;
 
-  /// Constructor requiring the [AppDatabase] instance.
+  /// Constructor: Requires an instance of AppDatabase
   WorkRepository(this._db);
 
-  // ---------------------------------------------------------------------------
-  // Work Type (Rate Card) Operations
-  // ---------------------------------------------------------------------------
+  // ===========================================================================
+  // WORK TYPE (RATE CARD) OPERATIONS
+  // ===========================================================================
 
   /// Retrieves all defined work types (Rate Card).
   Future<List<WorkType>> getAllWorkTypes() {
@@ -36,9 +49,9 @@ class WorkRepository {
     return _db.deleteWorkType(workType);
   }
 
-  // ---------------------------------------------------------------------------
-  // Work Entry Operations
-  // ---------------------------------------------------------------------------
+  // ===========================================================================
+  // WORK ENTRY OPERATIONS
+  // ===========================================================================
 
   /// Retrieves all work entries for a specific farmer.
   Future<List<Work>> getWorksForFarmer(int farmerId) {
@@ -46,7 +59,9 @@ class WorkRepository {
   }
 
   /// Adds a new work entry for a farmer.
-  /// Calculates duration and total amount before saving.
+  /// Automatically calculates:
+  /// - Duration (in minutes)
+  /// - Total Amount (Duration * Rate)
   Future<int> addWork({
     required int farmerId,
     int? workTypeId,
@@ -89,7 +104,7 @@ class WorkRepository {
     return _db.updateWork(work);
   }
   
-  /// Gets total earnings summary.
+  /// Gets total earnings summary (Sum of all work amounts).
   Future<double> getTotalEarnings() async {
     return (await _db.getTotalEarnings()) ?? 0.0;
   }
@@ -99,9 +114,9 @@ class WorkRepository {
     return _db.getTotalWorkCount();
   }
 
-  // ---------------------------------------------------------------------------
-  // Payment Operations
-  // ---------------------------------------------------------------------------
+  // ===========================================================================
+  // PAYMENT OPERATIONS
+  // ===========================================================================
 
   /// Retrieves all payments for a specific farmer.
   Future<List<Payment>> getPaymentsForFarmer(int farmerId) {
@@ -125,17 +140,18 @@ class WorkRepository {
   /// Updates a payment entry.
   Future<bool> updatePayment(Payment payment) => _db.updatePayment(payment);
 
-  /// Gets total received amount.
+  /// Gets total received amount (Sum of all payments).
   Future<double> getTotalReceived() async => (await _db.getTotalReceived()) ?? 0.0;
 
   /// Gets pending amount for all farmers efficiently.
+  /// Calculates: (Total Work Amount - Total Payment Amount) for each farmer.
   Future<Map<int, double>> getAllFarmerPendingAmounts() async {
     final workTotals = await _db.getFarmerWorkTotals();
     final paymentTotals = await _db.getFarmerPaymentTotals();
     
     final Map<int, double> pendingMap = {};
     
-    // Merge keys
+    // Merge keys from both maps
     final allKeys = {...workTotals.keys, ...paymentTotals.keys};
     
     for (final id in allKeys) {
