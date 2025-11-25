@@ -415,10 +415,13 @@ class _AddWorkScreenState extends State<AddWorkScreen> with SingleTickerProvider
                       
                       if (confirm == true) {
                         if (!mounted) return;
+                        // ignore: use_build_context_synchronously
                         await Provider.of<WorkProvider>(context, listen: false).deleteWork(widget.workToEdit!);
                         
                         if (!mounted) return;
+                        // ignore: use_build_context_synchronously
                         Navigator.pop(context);
+                        // ignore: use_build_context_synchronously
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(content: Text(locale.translate('farmer_profile.delete_work_message'))),
                         );
