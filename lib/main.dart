@@ -1,15 +1,15 @@
-/// =============================================================================
-/// PROJECT: Tractor Khata
-/// FILE: main.dart
-/// DESCRIPTION:
-/// This is the entry point of the Tractor Khata application.
-/// It handles:
-/// 1. App Initialization (Firebase, SharedPreferences, Database)
-/// 2. Provider Setup (State Management)
-/// 3. Theme Configuration (Material 3, Google Fonts)
-/// 4. Localization Setup (Hindi & English)
-/// 5. Navigation & Routing
-/// =============================================================================
+// =============================================================================
+// PROJECT: Tractor Khata
+// FILE: main.dart
+// DESCRIPTION:
+// This is the entry point of the Tractor Khata application.
+// It handles:
+// 1. App Initialization (Firebase, SharedPreferences, Database)
+// 2. Provider Setup (State Management)
+// 3. Theme Configuration (Material 3, Google Fonts)
+// 4. Localization Setup (Hindi & English)
+// 5. Navigation & Routing
+// =============================================================================
 
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -27,13 +27,11 @@ import 'providers/auth_provider.dart';
 import 'providers/farmer_provider.dart';
 import 'providers/work_provider.dart';
 import 'providers/driver_provider.dart';
+import 'services/localization_service.dart';
 
 // --- Repository Imports ---
 import 'repositories/farmer_repository.dart';
 import 'repositories/work_repository.dart';
-
-// --- Service Imports ---
-import 'services/localization_service.dart';
 
 // --- Screen Imports ---
 import 'screens/login_screen.dart';
@@ -170,12 +168,12 @@ class TractorKhataApp extends StatelessWidget {
             ),
             
             // Card Theme
-            cardTheme: CardTheme(
-              elevation: 2,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-              color: Colors.white,
-              margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-            ),
+            // cardTheme: CardTheme(
+            //   elevation: 2,
+            //   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            //   color: Colors.white,
+            //   margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+            // ),
             
             // Input Decoration Theme (Text Fields)
             inputDecorationTheme: InputDecorationTheme(

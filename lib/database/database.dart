@@ -1,13 +1,13 @@
-/// =============================================================================
-/// PROJECT: Tractor Khata
-/// FILE: database.dart
-/// DESCRIPTION:
-/// This file defines the main AppDatabase class using Drift (SQLite ORM).
-/// It handles:
-/// 1. Database Connection (LazyDatabase)
-/// 2. Schema Versioning & Migrations
-/// 3. DAOs (Data Access Objects) for Farmers, Works, Payments, and WorkTypes
-/// =============================================================================
+// =============================================================================
+// PROJECT: Tractor Khata
+// FILE: database.dart
+// DESCRIPTION:
+// This file defines the main AppDatabase class using Drift (SQLite ORM).
+// It handles:
+// 1. Database Connection (LazyDatabase)
+// 2. Schema Versioning & Migrations
+// 3. DAOs (Data Access Objects) for Farmers, Works, Payments, and WorkTypes
+// =============================================================================
 
 import 'dart:io';
 

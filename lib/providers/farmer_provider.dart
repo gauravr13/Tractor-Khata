@@ -1,11 +1,11 @@
-/// =============================================================================
-/// PROJECT: Tractor Khata
-/// FILE: farmer_provider.dart
-/// DESCRIPTION:
-/// This provider manages the state of Farmer data.
-/// It interacts with the FarmerRepository to fetch, add, update, and delete farmers.
-/// It notifies listeners (UI) whenever the state changes.
-/// =============================================================================
+// =============================================================================
+// PROJECT: Tractor Khata
+// FILE: farmer_provider.dart
+// DESCRIPTION:
+// This provider manages the state of Farmer data.
+// It interacts with the FarmerRepository to fetch, add, update, and delete farmers.
+// It notifies listeners (UI) whenever the state changes.
+// =============================================================================
 
 import 'package:flutter/foundation.dart';
 import '../database/database.dart';

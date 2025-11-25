@@ -1,14 +1,14 @@
-/// =============================================================================
-/// PROJECT: Tractor Khata
-/// FILE: time_picker_popup.dart
-/// DESCRIPTION:
-/// A custom, modern 12-hour time picker widget.
-/// Features:
-/// 1. iOS-style scroll wheels for Hour and Minute selection.
-/// 2. Segmented control for AM/PM toggling.
-/// 3. Smooth animations and haptic feedback for better UX.
-/// 4. Localized labels (AM/PM, Select Time, etc.).
-/// =============================================================================
+// =============================================================================
+// PROJECT: Tractor Khata
+// FILE: time_picker_popup.dart
+// DESCRIPTION:
+// A custom, modern 12-hour time picker widget.
+// Features:
+// 1. iOS-style scroll wheels for Hour and Minute selection.
+// 2. Segmented control for AM/PM toggling.
+// 3. Smooth animations and haptic feedback for better UX.
+// 4. Localized labels (AM/PM, Select Time, etc.).
+// =============================================================================
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';

@@ -1,13 +1,13 @@
-/// =============================================================================
-/// PROJECT: Tractor Khata
-/// FILE: localization_service.dart
-/// DESCRIPTION:
-/// This file handles the localization (translation) logic for the app.
-/// It includes:
-/// 1. AppLocalizations: Loads JSON translation files and provides a translate() method.
-/// 2. AppLocalizationsDelegate: The delegate that Flutter uses to load localizations.
-/// 3. LocaleProvider: A ChangeNotifier to manage the selected language state.
-/// =============================================================================
+// =============================================================================
+// PROJECT: Tractor Khata
+// FILE: localization_service.dart
+// DESCRIPTION:
+// This file handles the application's localization (multi-language support).
+// It includes:
+// 1. AppLocalizations: Loads and provides translations from JSON files.
+// 2. AppLocalizationsDelegate: Factory for creating AppLocalizations.
+// 3. LocaleProvider: Manages the current locale state and persistence.
+// =============================================================================
 
 import 'dart:convert';
 import 'package:flutter/material.dart';

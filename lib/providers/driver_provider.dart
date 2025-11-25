@@ -1,12 +1,12 @@
-/// =============================================================================
-/// PROJECT: Tractor Khata
-/// FILE: driver_provider.dart
-/// DESCRIPTION:
-/// This provider handles the state for the Driver's (User's) Profile.
-/// It manages:
-/// 1. Loading/Saving profile data (Name, Phone, Email, Photo)
-/// 2. Syncing with Google Account (Name, Email, Photo)
-/// =============================================================================
+// =============================================================================
+// PROJECT: Tractor Khata
+// FILE: driver_provider.dart
+// DESCRIPTION:
+// This provider handles the state for the Driver's (User's) Profile.
+// It manages:
+// 1. Loading/Saving profile data (Name, Phone, Email, Photo)
+// 2. Syncing with Google Account (Name, Email, Photo)
+// =============================================================================
 
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';

@@ -1,13 +1,13 @@
-/// =============================================================================
-/// PROJECT: Tractor Khata
-/// FILE: work_provider.dart
-/// DESCRIPTION:
-/// This provider handles the state for:
-/// 1. Work Entries (Adding, Editing, Deleting)
-/// 2. Payments (Adding, Editing, Deleting)
-/// 3. Rate Card (Work Types)
-/// 4. Dashboard Statistics (Total Earnings, Pending Amounts)
-/// =============================================================================
+// =============================================================================
+// PROJECT: Tractor Khata
+// FILE: work_provider.dart
+// DESCRIPTION:
+// This provider handles the state for:
+// 1. Work Entries (Adding, Editing, Deleting)
+// 2. Payments (Adding, Editing, Deleting)
+// 3. Rate Card (Work Types)
+// 4. Dashboard Statistics (Total Earnings, Pending Amounts)
+// =============================================================================
 
 import 'package:flutter/foundation.dart';
 import '../database/database.dart';

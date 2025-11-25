@@ -1,13 +1,13 @@
-/// =============================================================================
-/// PROJECT: Tractor Khata
-/// FILE: auth_provider.dart
-/// DESCRIPTION:
-/// This provider handles the Authentication state using Firebase Auth and Google Sign-In.
-/// It manages:
-/// 1. User Login (Google Sign-In)
-/// 2. User Logout
-/// 3. Auth State Monitoring (Listening to changes)
-/// =============================================================================
+// =============================================================================
+// PROJECT: Tractor Khata
+// FILE: auth_provider.dart
+// DESCRIPTION:
+// This provider handles the Authentication state using Firebase Auth and Google Sign-In.
+// It manages:
+// 1. User Login (Google Sign-In)
+// 2. User Logout
+// 3. Auth State Monitoring (Listening to changes)
+// =============================================================================
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';

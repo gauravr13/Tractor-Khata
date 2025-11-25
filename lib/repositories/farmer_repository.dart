@@ -1,10 +1,10 @@
-/// =============================================================================
-/// PROJECT: Tractor Khata
-/// FILE: farmer_repository.dart
-/// DESCRIPTION:
-/// This repository handles all data operations related to Farmers.
-/// It acts as an abstraction layer between the UI/Providers and the Database.
-/// =============================================================================
+// =============================================================================
+// PROJECT: Tractor Khata
+// FILE: farmer_repository.dart
+// DESCRIPTION:
+// This repository handles all data operations related to Farmers.
+// It acts as an abstraction layer between the UI/Providers and the Database.
+// =============================================================================
 
 import 'package:drift/drift.dart';
 import '../database/database.dart';

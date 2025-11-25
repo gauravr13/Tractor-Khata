@@ -1,10 +1,10 @@
-/// =============================================================================
-/// PROJECT: Tractor Khata
-/// FILE: login_screen.dart
-/// DESCRIPTION:
-/// This screen handles user authentication via Google Sign-In.
-/// It is the first screen shown to unauthenticated users.
-/// =============================================================================
+// =============================================================================
+// PROJECT: Tractor Khata
+// FILE: login_screen.dart
+// DESCRIPTION:
+// This screen handles user authentication via Google Sign-In.
+// It is the first screen shown to unauthenticated users.
+// =============================================================================
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';

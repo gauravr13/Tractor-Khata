@@ -1,14 +1,14 @@
-/// =============================================================================
-/// PROJECT: Tractor Khata
-/// FILE: tables.dart
-/// DESCRIPTION:
-/// This file defines the database schema using the Drift package.
-/// It contains the table definitions for:
-/// 1. Farmers: Stores farmer profiles.
-/// 2. WorkTypes: Stores rate card items (e.g., Plowing, Sowing).
-/// 3. Works: Stores individual work records linked to farmers.
-/// 4. Payments: Stores payment records linked to farmers.
-/// =============================================================================
+// =============================================================================
+// PROJECT: Tractor Khata
+// FILE: tables.dart
+// DESCRIPTION:
+// This file defines the database schema using the Drift package.
+// It contains the table definitions for:
+// 1. Farmers: Stores farmer profiles.
+// 2. WorkTypes: Stores rate card items (e.g., Plowing, Sowing).
+// 3. Works: Stores individual work records linked to farmers.
+// 4. Payments: Stores payment records linked to farmers.
+// =============================================================================
 
 import 'package:drift/drift.dart';
 

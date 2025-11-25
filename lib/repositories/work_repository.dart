@@ -1,12 +1,12 @@
-/// =============================================================================
-/// PROJECT: Tractor Khata
-/// FILE: work_repository.dart
-/// DESCRIPTION:
-/// This repository handles all data operations related to:
-/// 1. Work Entries (Recording work done)
-/// 2. Work Types (Rate Card management)
-/// 3. Payments (Recording payments received)
-/// =============================================================================
+// =============================================================================
+// PROJECT: Tractor Khata
+// FILE: work_repository.dart
+// DESCRIPTION:
+// This repository handles all data operations related to:
+// 1. Work Entries (Recording work done)
+// 2. Work Types (Rate Card management)
+// 3. Payments (Recording payments received)
+// =============================================================================
 
 import 'package:drift/drift.dart';
 import '../database/database.dart';

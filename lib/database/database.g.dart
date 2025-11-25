@@ -171,22 +171,22 @@ class $FarmersTable extends Farmers with TableInfo<$FarmersTable, Farmer> {
 }
 
 class Farmer extends DataClass implements Insertable<Farmer> {
-  /// Unique identifier for the farmer. Auto-incremented.
+  /// Unique identifier (Primary Key, Auto-increment)
   final int id;
 
-  /// Name of the farmer. Required.
+  /// Farmer's Name (Required)
   final String name;
 
-  /// Phone number of the farmer. Optional.
+  /// Farmer's Phone Number (Optional)
   final String? phone;
 
-  /// Additional notes about the farmer. Optional.
+  /// Additional Notes (Optional)
   final String? notes;
 
-  /// Date and time when this record was created.
+  /// Record Creation Timestamp (Default: Current Time)
   final DateTime createdAt;
 
-  /// Date and time when this record was last updated.
+  /// Record Update Timestamp (Default: Current Time)
   final DateTime updatedAt;
   const Farmer({
     required this.id,
@@ -560,19 +560,19 @@ class $WorkTypesTable extends WorkTypes
 }
 
 class WorkType extends DataClass implements Insertable<WorkType> {
-  /// Unique identifier for the work type. Auto-incremented.
+  /// Unique identifier (Primary Key, Auto-increment)
   final int id;
 
-  /// Name of the work type (e.g., "Jutai"). Required.
+  /// Name of the work (e.g., "Jutai", "Rotavator")
   final String name;
 
-  /// Default rate per hour for this work type. Required.
+  /// Default Rate per Hour for this work type
   final double ratePerHour;
 
-  /// Date and time when this record was created.
+  /// Record Creation Timestamp
   final DateTime createdAt;
 
-  /// Date and time when this record was last updated.
+  /// Record Update Timestamp
   final DateTime updatedAt;
   const WorkType({
     required this.id,
@@ -1077,43 +1077,38 @@ class $WorksTable extends Works with TableInfo<$WorksTable, Work> {
 }
 
 class Work extends DataClass implements Insertable<Work> {
-  /// Unique identifier for the work entry. Auto-incremented.
+  /// Unique identifier (Primary Key, Auto-increment)
   final int id;
 
-  /// Foreign key linking to the [Farmers] table.
-  /// Identifies which farmer this work belongs to.
+  /// Foreign Key: Links to the Farmer who owns this work
   final int farmerId;
 
-  /// Foreign key linking to the [WorkTypes] table.
-  /// Optional, because the user might enter a custom work name.
+  /// Foreign Key: Links to a WorkType (Optional)
+  /// Nullable because users can enter a custom work name without a predefined type.
   final int? workTypeId;
 
-  /// Custom name for the work if not selected from [WorkTypes].
-  /// This is used when 'Write your own work name' is selected.
+  /// Custom Work Name (Used if workTypeId is null)
   final String? customWorkName;
 
-  /// The time when the work started.
+  /// Work Start Time
   final DateTime startTime;
 
-  /// The time when the work ended.
+  /// Work End Time
   final DateTime endTime;
 
-  /// The total duration of the work in minutes.
-  /// Calculated as (endTime - startTime).
+  /// Duration in Minutes (Calculated: endTime - startTime)
   final int durationInMinutes;
 
-  /// The rate charged per hour for this specific work entry.
+  /// Rate Charged Per Hour for this specific job
   final double ratePerHour;
 
-  /// The total amount for this work entry.
-  /// Calculated as (durationInHours * ratePerHour).
+  /// Total Amount (Calculated: Duration * Rate)
   final double totalAmount;
 
-  /// The date when the work was performed.
-  /// Usually the same as startTime, but stored separately for easier filtering by date.
+  /// Date of Work (Stored separately for easier filtering)
   final DateTime workDate;
 
-  /// Additional notes about this specific work entry.
+  /// Additional Notes for this work
   final String? notes;
   const Work({
     required this.id,
@@ -1644,11 +1639,22 @@ class $PaymentsTable extends Payments with TableInfo<$PaymentsTable, Payment> {
 }
 
 class Payment extends DataClass implements Insertable<Payment> {
+  /// Unique identifier (Primary Key, Auto-increment)
   final int id;
+
+  /// Foreign Key: Links to the Farmer who made the payment
   final int farmerId;
+
+  /// Amount Received
   final double amount;
+
+  /// Date of Payment
   final DateTime date;
+
+  /// Additional Notes (e.g., "Cash", "UPI")
   final String? notes;
+
+  /// Record Creation Timestamp
   final DateTime createdAt;
   const Payment({
     required this.id,
