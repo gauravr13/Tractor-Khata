@@ -166,7 +166,7 @@ class _TimePickerPopupState extends State<TimePickerPopup> {
               foregroundColor: Colors.grey.shade600,
             ),
             child: Text(
-              locale.translate('common.cancel'),
+              locale.translate('time_picker.cancel'),
               style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
             ),
           ),
@@ -193,7 +193,7 @@ class _TimePickerPopupState extends State<TimePickerPopup> {
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),
             child: Text(
-              locale.translate('common.ok'),
+              locale.translate('time_picker.ok'),
               style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.white),
             ),
           ),
@@ -254,7 +254,8 @@ class _TimePickerPopupState extends State<TimePickerPopup> {
   Widget _buildAmPmSegment(Color primaryColor, AppLocalizations locale) {
     return Container(
       height: 48,
-      width: 200,
+      width: double.infinity, // Make it responsive
+      constraints: const BoxConstraints(maxWidth: 300), // Limit max width
       decoration: BoxDecoration(
         color: Colors.grey.shade100,
         borderRadius: BorderRadius.circular(12),
@@ -262,8 +263,8 @@ class _TimePickerPopupState extends State<TimePickerPopup> {
       ),
       child: Row(
         children: [
-          _buildSegmentOption('AM', 'AM', primaryColor),
-          _buildSegmentOption('PM', 'PM', primaryColor),
+          _buildSegmentOption(locale.translate('time_picker.am'), 'AM', primaryColor),
+          _buildSegmentOption(locale.translate('time_picker.pm'), 'PM', primaryColor),
         ],
       ),
     );

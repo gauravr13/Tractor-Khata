@@ -7,6 +7,8 @@ import 'farmer_profile_screen.dart';
 import '../database/database.dart'; // Needed for Farmer type
 import '../providers/auth_provider.dart';
 import '../providers/driver_provider.dart';
+import '../widgets/staggered_list_item.dart';
+import 'add_farmer_screen.dart';
 
 class FarmerListScreen extends StatefulWidget {
   const FarmerListScreen({super.key});
@@ -77,52 +79,56 @@ class _FarmerListScreenState extends State<FarmerListScreen> {
       ),
       body: Column(
         children: [
-          // Animated Search Bar
-          AnimatedContainer(
-            duration: const Duration(milliseconds: 240),
-            height: _isSearchVisible ? 80.0 : 0.0,
-            curve: Curves.easeOutCubic,
-            child: _isSearchVisible ? Padding(
-              padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-              child: Center(
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(12),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.05),
-                        blurRadius: 4,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
-                    border: Border.all(color: Colors.grey.shade200),
-                  ),
-                  child: TextField(
-                    controller: _searchController,
-                    focusNode: _searchFocusNode,
-                    decoration: InputDecoration(
-                      hintText: locale.translate('farmer_list.search_hint'),
-                      prefixIcon: const Icon(Icons.search, color: Colors.grey),
-                      border: InputBorder.none,
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                      suffixIcon: _searchController.text.isNotEmpty ? IconButton(
-                        icon: const Icon(Icons.clear, color: Colors.grey),
-                        onPressed: () {
-                          _searchController.clear();
-                          Provider.of<FarmerProvider>(context, listen: false).searchFarmers('');
-                          setState(() {});
-                        },
-                      ) : null,
+          // Animated Search Bar (Slides from Right to Left)
+          Align(
+            alignment: Alignment.centerRight,
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 300),
+              width: _isSearchVisible ? MediaQuery.of(context).size.width : 0.0,
+              height: _isSearchVisible ? 70.0 : 0.0,
+              curve: Curves.easeOutCubic,
+              child: _isSearchVisible ? Padding(
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+                child: Center(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.05),
+                          blurRadius: 4,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                      border: Border.all(color: Colors.grey.shade200),
                     ),
-                    onChanged: (value) {
-                      Provider.of<FarmerProvider>(context, listen: false).searchFarmers(value);
-                      setState(() {});
-                    },
+                    child: TextField(
+                      controller: _searchController,
+                      focusNode: _searchFocusNode,
+                      decoration: InputDecoration(
+                        hintText: locale.translate('farmer_list.search_hint'),
+                        prefixIcon: const Icon(Icons.search, color: Colors.grey),
+                        border: InputBorder.none,
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                        suffixIcon: _searchController.text.isNotEmpty ? IconButton(
+                          icon: const Icon(Icons.clear, color: Colors.grey),
+                          onPressed: () {
+                            _searchController.clear();
+                            Provider.of<FarmerProvider>(context, listen: false).searchFarmers('');
+                            setState(() {});
+                          },
+                        ) : null,
+                      ),
+                      onChanged: (value) {
+                        Provider.of<FarmerProvider>(context, listen: false).searchFarmers(value);
+                        setState(() {});
+                      },
+                    ),
                   ),
                 ),
-              ),
-            ) : null,
+              ) : null,
+            ),
           ),
           Expanded(
             child: Consumer2<FarmerProvider, WorkProvider>(
@@ -149,10 +155,13 @@ class _FarmerListScreenState extends State<FarmerListScreen> {
                     final farmer = farmerProvider.farmers[index];
                     final pendingAmount = workProvider.allFarmerPendingAmounts[farmer.id] ?? 0.0;
                     
-                    return _FarmerListItem(
-                      farmer: farmer,
-                      pendingAmount: pendingAmount,
-                      locale: locale,
+                    return StaggeredListItem(
+                      index: index,
+                      child: _FarmerListItem(
+                        farmer: farmer,
+                        pendingAmount: pendingAmount,
+                        locale: locale,
+                      ),
                     );
                   },
                 );
@@ -161,12 +170,28 @@ class _FarmerListScreenState extends State<FarmerListScreen> {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {
-          Navigator.pushNamed(context, '/add_farmer');
+      floatingActionButton: TweenAnimationBuilder<double>(
+        tween: Tween(begin: 0.0, end: 1.0),
+        duration: const Duration(milliseconds: 400),
+        curve: Curves.easeOutBack,
+        builder: (context, value, child) {
+          return Transform.scale(
+            scale: value,
+            child: child,
+          );
         },
-        label: Text(locale.translate('farmer_list.add_farmer')),
-        icon: const Icon(Icons.add),
+        child: FloatingActionButton.extended(
+          onPressed: () {
+            showModalBottomSheet(
+              context: context,
+              isScrollControlled: true,
+              backgroundColor: Colors.transparent,
+              builder: (context) => AddFarmerScreen(isBottomSheet: true),
+            );
+          },
+          label: Text(locale.translate('farmer_list.add_farmer')),
+          icon: const Icon(Icons.add),
+        ),
       ),
     );
   }

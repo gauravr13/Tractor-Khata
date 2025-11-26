@@ -5,7 +5,8 @@ import 'package:intl/intl.dart';
 import 'package:drift/drift.dart' hide Column;
 import '../database/database.dart';
 import '../providers/work_provider.dart';
-import '../widgets/time_picker_popup.dart';
+import '../widgets/ios_time_picker.dart';
+import '../widgets/scale_button.dart';
 import '../services/localization_service.dart';
 
 /// Add Work Screen - Final Rebuild
@@ -114,23 +115,26 @@ class _AddWorkScreenState extends State<AddWorkScreen> with SingleTickerProvider
   }
 
   Future<void> _pickTime(bool isStart) async {
-    final initial = isStart ? _startTime : _endTime;
-    // Open the new separate TimePickerPopup
-    final result = await showDialog<TimeOfDay>(
-      context: context,
-      builder: (context) => TimePickerPopup(initialTime: initial),
-    );
+    final initial = isStart ? (_startTime ?? TimeOfDay.now()) : (_endTime ?? TimeOfDay.now());
     
-    if (result != null) {
-      setState(() {
-        if (isStart) {
-          _startTime = result;
-        } else {
-          _endTime = result;
-        }
-        _calculateTotalTime();
-      });
-    }
+    await showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (context) => IOSTimePicker(
+        initialTime: initial,
+        onTimeChanged: (newTime) {
+          setState(() {
+            if (isStart) {
+              _startTime = newTime;
+            } else {
+              _endTime = newTime;
+            }
+            _calculateTotalTime();
+          });
+        },
+      ),
+    );
   }
 
   Future<void> _saveWork() async {
@@ -401,22 +405,31 @@ class _AddWorkScreenState extends State<AddWorkScreen> with SingleTickerProvider
               ),
               const SizedBox(height: 24),
 
-              // 9. Save
+              // 9. Save Button
               SizedBox(
-                height: 54,
-                child: ElevatedButton(
+                width: double.infinity,
+                height: 50,
+                child: ScaleButton(
                   onPressed: _isSaving ? null : _saveWork,
-                  child: _isSaving ? const CircularProgressIndicator(color: Colors.white) : Text(widget.workToEdit != null ? locale.translate('add_work.update_button') : locale.translate('add_work.save_button'), style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                  child: ElevatedButton(
+                    onPressed: _isSaving ? null : _saveWork,
+                    child: _isSaving 
+                        ? const SizedBox(height: 24, width: 24, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2.5)) 
+                        : Text(
+                            widget.workToEdit != null ? locale.translate('add_work.update_button') : locale.translate('add_work.save_button'),
+                            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                          ),
+                  ),
                 ),
               ),
               
-              // 10. Delete Button (only when editing)
+              // Delete Button (only when editing)
               if (widget.workToEdit != null) ...[
                 const SizedBox(height: 12),
                 SizedBox(
                   height: 48,
                   width: double.infinity,
-                  child: OutlinedButton.icon(
+                  child: ScaleButton(
                     onPressed: () async {
                       final confirm = await showDialog<bool>(
                         context: context,
@@ -438,11 +451,9 @@ class _AddWorkScreenState extends State<AddWorkScreen> with SingleTickerProvider
                       
                       if (confirm == true) {
                         if (!mounted) return;
-                        // ignore: use_build_context_synchronously
                         await Provider.of<WorkProvider>(context, listen: false).deleteWork(widget.workToEdit!);
                         
                         if (!mounted) return;
-                        // ignore: use_build_context_synchronously
                         Navigator.pop(context);
                         // ignore: use_build_context_synchronously
                         ScaffoldMessenger.of(context).showSnackBar(
@@ -450,10 +461,13 @@ class _AddWorkScreenState extends State<AddWorkScreen> with SingleTickerProvider
                         );
                       }
                     },
-                    icon: const Icon(Icons.delete, color: Colors.red),
-                    label: Text(locale.translate('common.delete'), style: const TextStyle(color: Colors.red, fontWeight: FontWeight.w600)),
-                    style: OutlinedButton.styleFrom(
-                      side: const BorderSide(color: Colors.red),
+                    child: OutlinedButton.icon(
+                      onPressed: null, // Handled by ScaleButton
+                      icon: const Icon(Icons.delete, color: Colors.red),
+                      label: Text(locale.translate('common.delete'), style: const TextStyle(color: Colors.red, fontWeight: FontWeight.w600)),
+                      style: OutlinedButton.styleFrom(
+                        side: const BorderSide(color: Colors.red),
+                      ),
                     ),
                   ),
                 ),

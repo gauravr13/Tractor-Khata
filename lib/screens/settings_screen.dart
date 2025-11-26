@@ -6,6 +6,7 @@ import '../providers/work_provider.dart';
 import '../providers/driver_provider.dart';
 import '../services/localization_service.dart';
 import 'driver_profile_screen.dart';
+import '../widgets/scale_button.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -101,23 +102,28 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           Expanded(
                             child: AnimatedContainer(
                               duration: const Duration(milliseconds: 200),
-                              child: ElevatedButton(
+                              child: ScaleButton(
                                 onPressed: () {
                                   localeProvider.setLocale(const Locale('hi'));
                                 },
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: localeProvider.locale.languageCode == 'hi' 
-                                      ? Colors.green 
-                                      : Colors.grey.shade300,
-                                  foregroundColor: localeProvider.locale.languageCode == 'hi' 
-                                      ? Colors.white 
-                                      : Colors.black87,
-                                  padding: const EdgeInsets.symmetric(vertical: 16),
-                                  elevation: localeProvider.locale.languageCode == 'hi' ? 4 : 1,
-                                ),
-                                child: Text(
-                                  locale.translate('settings.hindi'),
-                                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+                                child: ElevatedButton(
+                                  onPressed: () {
+                                    localeProvider.setLocale(const Locale('hi'));
+                                  },
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: localeProvider.locale.languageCode == 'hi' 
+                                        ? Colors.green 
+                                        : Colors.grey.shade300,
+                                    foregroundColor: localeProvider.locale.languageCode == 'hi' 
+                                        ? Colors.white 
+                                        : Colors.black87,
+                                    padding: const EdgeInsets.symmetric(vertical: 16),
+                                    elevation: localeProvider.locale.languageCode == 'hi' ? 4 : 1,
+                                  ),
+                                  child: Text(
+                                    locale.translate('settings.hindi'),
+                                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+                                  ),
                                 ),
                               ),
                             ),
@@ -126,23 +132,28 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           Expanded(
                             child: AnimatedContainer(
                               duration: const Duration(milliseconds: 200),
-                              child: ElevatedButton(
+                              child: ScaleButton(
                                 onPressed: () {
                                   localeProvider.setLocale(const Locale('en'));
                                 },
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: localeProvider.locale.languageCode == 'en' 
-                                      ? Colors.green 
-                                      : Colors.grey.shade300,
-                                  foregroundColor: localeProvider.locale.languageCode == 'en' 
-                                      ? Colors.white 
-                                      : Colors.black87,
-                                  padding: const EdgeInsets.symmetric(vertical: 16),
-                                  elevation: localeProvider.locale.languageCode == 'en' ? 4 : 1,
-                                ),
-                                child: Text(
-                                  locale.translate('settings.english'),
-                                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+                                child: ElevatedButton(
+                                  onPressed: () {
+                                    localeProvider.setLocale(const Locale('en'));
+                                  },
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: localeProvider.locale.languageCode == 'en' 
+                                        ? Colors.green 
+                                        : Colors.grey.shade300,
+                                    foregroundColor: localeProvider.locale.languageCode == 'en' 
+                                        ? Colors.white 
+                                        : Colors.black87,
+                                    padding: const EdgeInsets.symmetric(vertical: 16),
+                                    elevation: localeProvider.locale.languageCode == 'en' ? 4 : 1,
+                                  ),
+                                  child: Text(
+                                    locale.translate('settings.english'),
+                                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+                                  ),
                                 ),
                               ),
                             ),

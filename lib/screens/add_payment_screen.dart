@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:drift/drift.dart';
 import '../database/database.dart';
 import '../providers/work_provider.dart';
+import '../widgets/scale_button.dart';
 import '../services/localization_service.dart';
 
 class AddPaymentScreen extends StatefulWidget {
@@ -135,22 +136,28 @@ class _AddPaymentScreenState extends State<AddPaymentScreen> {
               const SizedBox(height: 24),
 
               // Save Button
+              // Save Button
               SizedBox(
-                height: 54,
-                child: ElevatedButton(
+                width: double.infinity,
+                height: 50,
+                child: ScaleButton(
                   onPressed: _isSaving ? null : _savePayment,
-                  style: ElevatedButton.styleFrom(backgroundColor: Colors.green, foregroundColor: Colors.white),
-                  child: _isSaving ? const CircularProgressIndicator(color: Colors.white) : Text(widget.paymentToEdit != null ? locale.translate('add_payment.update_button') : locale.translate('add_payment.save_button'), style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                  child: ElevatedButton(
+                    onPressed: _isSaving ? null : _savePayment,
+                    style: ElevatedButton.styleFrom(backgroundColor: Colors.green, foregroundColor: Colors.white),
+                    child: _isSaving ? const SizedBox(height: 24, width: 24, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2.5)) : Text(widget.paymentToEdit != null ? locale.translate('add_payment.update_button') : locale.translate('add_payment.save_button'), style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                  ),
                 ),
               ),
               
+              // Delete Button (only when editing)
               // Delete Button (only when editing)
               if (widget.paymentToEdit != null) ...[
                 const SizedBox(height: 12),
                 SizedBox(
                   height: 48,
                   width: double.infinity,
-                  child: OutlinedButton.icon(
+                  child: ScaleButton(
                     onPressed: () async {
                       final confirm = await showDialog<bool>(
                         context: context,
@@ -184,10 +191,13 @@ class _AddPaymentScreenState extends State<AddPaymentScreen> {
                         );
                       }
                     },
-                    icon: const Icon(Icons.delete, color: Colors.red),
-                    label: Text(locale.translate('common.delete'), style: const TextStyle(color: Colors.red, fontWeight: FontWeight.w600)),
-                    style: OutlinedButton.styleFrom(
-                      side: const BorderSide(color: Colors.red),
+                    child: OutlinedButton.icon(
+                      onPressed: null, // Handled by ScaleButton
+                      icon: const Icon(Icons.delete, color: Colors.red),
+                      label: Text(locale.translate('common.delete'), style: const TextStyle(color: Colors.red, fontWeight: FontWeight.w600)),
+                      style: OutlinedButton.styleFrom(
+                        side: const BorderSide(color: Colors.red),
+                      ),
                     ),
                   ),
                 ),

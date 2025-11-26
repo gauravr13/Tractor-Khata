@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:image/image.dart' as img;
+import 'package:image_cropper/image_cropper.dart';
 import '../providers/driver_provider.dart';
 import '../services/localization_service.dart';
 
@@ -40,13 +42,33 @@ class _EditDriverProfileScreenState extends State<EditDriverProfileScreen> {
     super.dispose();
   }
 
+
+
   Future<void> _pickImage(ImageSource source) async {
     final picker = ImagePicker();
     final pickedFile = await picker.pickImage(source: source, imageQuality: 80);
 
     if (pickedFile != null) {
-      final compressedPath = await _compressAndSaveImage(pickedFile.path);
-      setState(() => _photoPath = compressedPath);
+      final croppedFile = await ImageCropper().cropImage(
+        sourcePath: pickedFile.path,
+        uiSettings: [
+          AndroidUiSettings(
+            toolbarTitle: 'Crop Image',
+            toolbarColor: Colors.green,
+            toolbarWidgetColor: Colors.white,
+            initAspectRatio: CropAspectRatioPreset.square,
+            lockAspectRatio: false,
+          ),
+          IOSUiSettings(
+            title: 'Crop Image',
+          ),
+        ],
+      );
+
+      if (croppedFile != null) {
+        final compressedPath = await _compressAndSaveImage(croppedFile.path);
+        setState(() => _photoPath = compressedPath);
+      }
     }
   }
 

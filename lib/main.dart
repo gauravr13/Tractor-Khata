@@ -41,9 +41,6 @@ import 'screens/settings_screen.dart';
 import 'screens/rate_card_screen.dart';
 import 'screens/add_work_type_screen.dart';
 
-// --- Utils Imports ---
-import 'utils/custom_page_transition.dart';
-
 /// ---------------------------------------------------------------------------
 /// Main Function
 /// ---------------------------------------------------------------------------
@@ -52,8 +49,6 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
   // Initialize critical services in parallel to optimize startup time
-  // 1. Firebase: For Authentication
-  // 2. SharedPreferences: For storing local settings (Language, etc.)
   final initFutures = await Future.wait([
     Firebase.initializeApp(),
     SharedPreferences.getInstance(),
@@ -79,19 +74,10 @@ void main() async {
   runApp(
     MultiProvider(
       providers: [
-        // Manages Language/Localization State
         ChangeNotifierProvider(create: (_) => LocaleProvider(initialLanguageCode: languageCode)),
-        
-        // Manages Driver Profile State
         ChangeNotifierProvider(create: (_) => DriverProvider()),
-        
-        // Manages Authentication State (Google Sign-In)
         ChangeNotifierProvider(create: (_) => AuthProvider()),
-        
-        // Manages Farmer Data State
         ChangeNotifierProvider(create: (_) => FarmerProvider(farmerRepository)),
-        
-        // Manages Work & Payment Data State
         ChangeNotifierProvider(create: (_) => WorkProvider(workRepository)),
       ],
       child: const TractorKhataApp(),
@@ -107,13 +93,10 @@ class TractorKhataApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Consumer2 listens to LocaleProvider and AuthProvider changes
     return Consumer2<LocaleProvider, AuthProvider>(
       builder: (context, localeProvider, authProvider, child) {
         return MaterialApp(
           title: 'Tractor Khata',
-          
-          // Disable the debug banner in top-right corner
           debugShowCheckedModeBanner: false,
           
           // --- Localization Configuration ---
@@ -132,34 +115,29 @@ class TractorKhataApp extends StatelessWidget {
           // --- Theme Configuration ---
           theme: ThemeData(
             primarySwatch: Colors.green,
-            useMaterial3: true, // Enable Material Design 3
-            scaffoldBackgroundColor: Colors.grey[100], // Light grey background for better contrast
+            useMaterial3: true,
+            scaffoldBackgroundColor: Colors.grey[50],
             
-            // Use Google Fonts (Poppins) for a modern look
             textTheme: GoogleFonts.poppinsTextTheme(Theme.of(context).textTheme).apply(
               bodyColor: Colors.black87,
               displayColor: Colors.black87,
             ),
             
-            // Optimize Page Transitions
-            pageTransitionsTheme: const PageTransitionsTheme(
+            // Global Page Transitions (Fade + Slide Up - Material 3 Style)
+            pageTransitionsTheme: PageTransitionsTheme(
               builders: {
-                TargetPlatform.android: ScaleFadePageTransitionsBuilder(),
-                TargetPlatform.iOS: ScaleFadePageTransitionsBuilder(),
+                TargetPlatform.android: FadeSlideUpTransitionBuilder(),
+                TargetPlatform.iOS: FadeSlideUpTransitionBuilder(),
               },
             ),
             
-            // AppBar Theme
             appBarTheme: const AppBarTheme(
               backgroundColor: Colors.green,
               foregroundColor: Colors.white,
-              elevation: 0, // Flat design
-              scrolledUnderElevation: 2, // Slight elevation on scroll
-              centerTitle: false,
-              titleTextStyle: TextStyle(fontSize: 20, fontWeight: FontWeight.w600, color: Colors.white),
+              elevation: 0,
+              centerTitle: true,
             ),
             
-            // Elevated Button Theme
             elevatedButtonTheme: ElevatedButtonThemeData(
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.green,
@@ -170,15 +148,6 @@ class TractorKhataApp extends StatelessWidget {
               ),
             ),
             
-            // Card Theme
-            // cardTheme: CardTheme(
-            //   elevation: 2,
-            //   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-            //   color: Colors.white,
-            //   margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-            // ),
-            
-            // Input Decoration Theme (Text Fields)
             inputDecorationTheme: InputDecorationTheme(
               filled: true,
               fillColor: Colors.white,
@@ -199,10 +168,8 @@ class TractorKhataApp extends StatelessWidget {
           ),
           
           // --- Routing Logic ---
-          // If user is authenticated, show FarmerListScreen, otherwise LoginScreen
           home: authProvider.isAuthenticated ? const FarmerListScreen() : const LoginScreen(),
           
-          // Named Routes
           routes: {
             '/login': (context) => const LoginScreen(),
             '/farmer_list': (context) => const FarmerListScreen(),
@@ -213,6 +180,37 @@ class TractorKhataApp extends StatelessWidget {
           },
         );
       },
+    );
+  }
+}
+
+/// ---------------------------------------------------------------------------
+/// Custom Page Transition Builder
+/// Smooth Fade + Slide Up (Material 3 Style)
+/// ---------------------------------------------------------------------------
+class FadeSlideUpTransitionBuilder extends PageTransitionsBuilder {
+  @override
+  Widget buildTransitions<T>(
+    PageRoute<T> route,
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+    Widget child,
+  ) {
+    // Slide up from 10% down
+    const begin = Offset(0.0, 0.10);
+    const end = Offset.zero;
+    const curve = Curves.easeInOutCubic;
+
+    var slideTween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+    var fadeTween = Tween(begin: 0.0, end: 1.0).chain(CurveTween(curve: curve));
+
+    return SlideTransition(
+      position: animation.drive(slideTween),
+      child: FadeTransition(
+        opacity: animation.drive(fadeTween),
+        child: child,
+      ),
     );
   }
 }

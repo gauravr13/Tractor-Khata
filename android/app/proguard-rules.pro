@@ -10,5 +10,10 @@
 -keep class com.google.firebase.** { *; }
 -keep class com.google.android.gms.** { *; }
 
-# Drift
+# Drift & Others
 -keep class ** extends com.google.protobuf.GeneratedMessageLite { *; }
+-keepattributes *Annotation*
+-keepattributes Signature
+-keepattributes InnerClasses
+-keepattributes EnclosingMethod
+-dontwarn **

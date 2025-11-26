@@ -8,6 +8,8 @@ import '../services/localization_service.dart';
 import 'add_work_screen.dart';
 import 'add_payment_screen.dart';
 import 'add_farmer_screen.dart';
+import '../widgets/staggered_list_item.dart';
+import '../widgets/scale_button.dart';
 
 class FarmerProfileScreen extends StatefulWidget {
   final int farmerId;
@@ -28,7 +30,11 @@ class _FarmerProfileScreenState extends State<FarmerProfileScreen> {
   }
 
   Future<void> _loadData() async {
-    await Provider.of<WorkProvider>(context, listen: false).loadTransactionsForFarmer(widget.farmerId);
+    final workProvider = Provider.of<WorkProvider>(context, listen: false);
+    await Future.wait([
+      workProvider.loadTransactionsForFarmer(widget.farmerId),
+      workProvider.loadWorkTypes(),
+    ]);
   }
 
   Future<void> _deleteFarmer(Farmer farmer) async {
@@ -75,19 +81,26 @@ class _FarmerProfileScreenState extends State<FarmerProfileScreen> {
           appBar: AppBar(
             title: Text(farmer.name),
             actions: [
-              IconButton(
-                icon: const Icon(Icons.edit),
+              ScaleButton(
                 onPressed: () {
                   Navigator.push(
                     context,
                     MaterialPageRoute(builder: (context) => AddFarmerScreen(farmerToEdit: farmer)),
                   ).then((_) => _loadData());
                 },
+                child: const Padding(
+                  padding: EdgeInsets.all(8.0),
+                  child: Icon(Icons.edit),
+                ),
               ),
-              IconButton(
-                icon: const Icon(Icons.delete),
+              ScaleButton(
                 onPressed: () => _deleteFarmer(farmer),
+                child: const Padding(
+                  padding: EdgeInsets.all(8.0),
+                  child: Icon(Icons.delete),
+                ),
               ),
+              const SizedBox(width: 8),
             ],
           ),
           body: Column(
@@ -111,12 +124,18 @@ class _FarmerProfileScreenState extends State<FarmerProfileScreen> {
                       cacheExtent: 1000, // Preload for smooth scrolling
                       itemBuilder: (context, index) {
                         final item = workProvider.transactions[index];
+                        Widget child = const SizedBox.shrink();
+                        
                         if (item is Work) {
-                          return _buildWorkCard(context, item, workProvider.workTypes);
+                          child = _buildWorkCard(context, item, workProvider.workTypes);
                         } else if (item is Payment) {
-                          return _buildPaymentCard(context, item);
+                          child = _buildPaymentCard(context, item);
                         }
-                        return const SizedBox.shrink();
+                        
+                        return StaggeredListItem(
+                          index: index,
+                          child: child,
+                        );
                       },
                     );
                   },
@@ -127,42 +146,56 @@ class _FarmerProfileScreenState extends State<FarmerProfileScreen> {
           floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
           floatingActionButton: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Row(
-              children: [
-                Expanded(
-                  child: FloatingActionButton.extended(
-                    heroTag: 'payment',
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => AddPaymentScreen(farmerId: farmer.id)),
-                      ).then((_) => _loadData());
-                    },
-                    backgroundColor: Colors.green,
-                    foregroundColor: Colors.white,
-                    label: Text(locale.translate('farmer_profile.receive_payment')),
-                    icon: const Icon(Icons.currency_rupee),
-                    elevation: 4,
+            child: TweenAnimationBuilder<double>(
+              tween: Tween(begin: 0.0, end: 1.0),
+              duration: const Duration(milliseconds: 500),
+              curve: Curves.easeOutBack,
+              builder: (context, value, child) {
+                return Transform.translate(
+                  offset: Offset(0, 50 * (1 - value)), // Slide up
+                  child: Opacity(
+                    opacity: value,
+                    child: child,
                   ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: FloatingActionButton.extended(
-                    heroTag: 'work',
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => AddWorkScreen(farmerId: farmer.id)),
-                      ).then((_) => _loadData());
-                    },
-                    backgroundColor: Theme.of(context).primaryColor,
-                    foregroundColor: Colors.white,
-                    label: Text(locale.translate('farmer_profile.add_work')),
-                    icon: const Icon(Icons.add_task),
-                    elevation: 4,
+                );
+              },
+              child: Row(
+                children: [
+                  Expanded(
+                    child: FloatingActionButton.extended(
+                      heroTag: 'payment',
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => AddPaymentScreen(farmerId: farmer.id)),
+                        ).then((_) => _loadData());
+                      },
+                      backgroundColor: Colors.green,
+                      foregroundColor: Colors.white,
+                      label: Text(locale.translate('farmer_profile.receive_payment')),
+                      icon: const Icon(Icons.currency_rupee),
+                      elevation: 4,
+                    ),
                   ),
-                ),
-              ],
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: FloatingActionButton.extended(
+                      heroTag: 'work',
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => AddWorkScreen(farmerId: farmer.id)),
+                        ).then((_) => _loadData());
+                      },
+                      backgroundColor: Theme.of(context).primaryColor,
+                      foregroundColor: Colors.white,
+                      label: Text(locale.translate('farmer_profile.add_work')),
+                      icon: const Icon(Icons.add_task),
+                      elevation: 4,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         );

@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:drift/drift.dart';
+import 'package:drift/drift.dart' hide Column;
 import '../database/database.dart';
 import '../providers/farmer_provider.dart';
 import '../services/localization_service.dart';
+import '../widgets/scale_button.dart';
 
 class AddFarmerScreen extends StatefulWidget {
   final Farmer? farmerToEdit;
 
-  const AddFarmerScreen({super.key, this.farmerToEdit});
+  final bool isBottomSheet;
+
+  const AddFarmerScreen({super.key, this.farmerToEdit, this.isBottomSheet = false});
 
   @override
   State<AddFarmerScreen> createState() => _AddFarmerScreenState();
@@ -88,89 +91,126 @@ class _AddFarmerScreenState extends State<AddFarmerScreen> {
   Widget build(BuildContext context) {
     final locale = AppLocalizations.of(context)!;
     final isEditing = widget.farmerToEdit != null;
+    final title = isEditing ? locale.translate('add_farmer.title_edit') : locale.translate('add_farmer.title_add');
+
+    final formContent = Form(
+      key: _formKey,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          TextFormField(
+            controller: _nameController,
+            decoration: InputDecoration(
+              labelText: locale.translate('add_farmer.name_label'),
+              hintText: locale.translate('add_farmer.name_hint'),
+              prefixIcon: const Icon(Icons.person),
+              border: const OutlineInputBorder(),
+            ),
+            textCapitalization: TextCapitalization.words,
+            style: const TextStyle(fontSize: 16),
+            validator: (value) {
+              if (value == null || value.trim().isEmpty) {
+                return locale.translate('add_farmer.name_error');
+              }
+              return null;
+            },
+          ),
+          const SizedBox(height: 16),
+          
+          TextFormField(
+            controller: _phoneController,
+            decoration: InputDecoration(
+              labelText: locale.translate('add_farmer.phone_label'),
+              hintText: locale.translate('add_farmer.phone_hint'),
+              prefixIcon: const Icon(Icons.phone),
+              border: const OutlineInputBorder(),
+            ),
+            style: const TextStyle(fontSize: 16),
+            keyboardType: TextInputType.phone,
+          ),
+          const SizedBox(height: 16),
+          
+          TextFormField(
+            controller: _notesController,
+            decoration: InputDecoration(
+              labelText: locale.translate('add_farmer.notes_label'),
+              hintText: locale.translate('add_farmer.notes_hint'),
+              prefixIcon: const Icon(Icons.note),
+              border: const OutlineInputBorder(),
+            ),
+            style: const TextStyle(fontSize: 16),
+            maxLines: 3,
+          ),
+          const SizedBox(height: 24),
+          
+          SizedBox(
+            width: double.infinity,
+            height: 50,
+            child: ScaleButton(
+              onPressed: _isSaving ? null : _saveFarmer,
+              child: ElevatedButton(
+                onPressed: _isSaving ? null : _saveFarmer,
+                style: ElevatedButton.styleFrom(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+                child: _isSaving
+                    ? const SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.white,
+                        ),
+                      )
+                    : Text(
+                        isEditing ? locale.translate('add_farmer.update_button') : locale.translate('add_farmer.save_button'),
+                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+                      ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (widget.isBottomSheet) {
+      return Padding(
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.of(context).viewInsets.bottom,
+          left: 16,
+          right: 16,
+          top: 16,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 40,
+              height: 4,
+              margin: const EdgeInsets.only(bottom: 20),
+              decoration: BoxDecoration(
+                color: Colors.grey[300],
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            Text(title, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 20),
+            formContent,
+            const SizedBox(height: 20),
+          ],
+        ),
+      );
+    }
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(isEditing ? locale.translate('add_farmer.title_edit') : locale.translate('add_farmer.title_add')),
+        title: Text(title),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Form(
-          key: _formKey,
-          child: ListView(
-            children: [
-              TextFormField(
-                controller: _nameController,
-                decoration: InputDecoration(
-                  labelText: locale.translate('add_farmer.name_label'),
-                  hintText: locale.translate('add_farmer.name_hint'),
-                  prefixIcon: const Icon(Icons.person),
-                  border: const OutlineInputBorder(),
-                ),
-                textCapitalization: TextCapitalization.words,
-                style: const TextStyle(fontSize: 16),
-                validator: (value) {
-                  if (value == null || value.trim().isEmpty) {
-                    return locale.translate('add_farmer.name_error');
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 16),
-              
-              TextFormField(
-                controller: _phoneController,
-                decoration: InputDecoration(
-                  labelText: locale.translate('add_farmer.phone_label'),
-                  hintText: locale.translate('add_farmer.phone_hint'),
-                  prefixIcon: const Icon(Icons.phone),
-                  border: const OutlineInputBorder(),
-                ),
-                style: const TextStyle(fontSize: 16),
-                keyboardType: TextInputType.phone,
-              ),
-              const SizedBox(height: 16),
-              
-              TextFormField(
-                controller: _notesController,
-                decoration: InputDecoration(
-                  labelText: locale.translate('add_farmer.notes_label'),
-                  hintText: locale.translate('add_farmer.notes_hint'),
-                  prefixIcon: const Icon(Icons.note),
-                  border: const OutlineInputBorder(),
-                ),
-                style: const TextStyle(fontSize: 16),
-                maxLines: 3,
-              ),
-              const SizedBox(height: 24),
-              
-              SizedBox(
-                height: 54,
-                child: ElevatedButton(
-                  onPressed: _isSaving ? null : _saveFarmer,
-                  style: ElevatedButton.styleFrom(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                  child: _isSaving
-                      ? const SizedBox(
-                          height: 20,
-                          width: 20,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: Colors.white,
-                          ),
-                        )
-                      : Text(
-                          isEditing ? locale.translate('add_farmer.update_button') : locale.translate('add_farmer.save_button'),
-                          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
-                        ),
-                ),
-              ),
-            ],
-          ),
-        ),
+        child: ListView(children: [formContent]),
       ),
     );
   }
