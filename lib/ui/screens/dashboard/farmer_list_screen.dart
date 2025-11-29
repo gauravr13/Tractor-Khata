@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../providers/farmer_provider.dart';
-import '../providers/work_provider.dart';
-import '../providers/driver_provider.dart';
-import '../providers/auth_provider.dart';
-import '../services/localization_service.dart';
-import '../database/database.dart';
-import 'farmer_profile_screen.dart';
-import 'add_farmer_screen.dart';
-import '../utils/color_utils.dart';
+import '../../../core/providers/farmer_provider.dart';
+import '../../../core/providers/work_provider.dart';
+import '../../../core/providers/driver_provider.dart';
+import '../../../core/providers/auth_provider.dart';
+import '../../../core/services/localization_service.dart';
+import '../../../data/local/database.dart';
+import '../farmer/farmer_profile_screen.dart';
+import '../farmer/add_farmer_screen.dart';
+import '../../../core/utils/color_utils.dart';
 
 class FarmerListScreen extends StatefulWidget {
   const FarmerListScreen({super.key});

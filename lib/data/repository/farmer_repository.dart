@@ -7,7 +7,7 @@
 // =============================================================================
 
 import 'package:drift/drift.dart';
-import '../database/database.dart';
+import '../local/database.dart';
 
 /// ---------------------------------------------------------------------------
 /// Class: FarmerRepository

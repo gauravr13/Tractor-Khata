@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../providers/work_provider.dart';
-import '../services/localization_service.dart';
-import '../widgets/animated_bottom_sheet.dart';
+import '../../../core/providers/work_provider.dart';
+import '../../../core/services/localization_service.dart';
+import '../../components/dialogs/animated_bottom_sheet.dart';
 
 /// Add Work Type Screen.
 /// Form to add a new work type to the Rate Card.

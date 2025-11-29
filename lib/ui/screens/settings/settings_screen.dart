@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'dart:io';
-import '../providers/auth_provider.dart';
-import '../providers/driver_provider.dart';
-// import '../providers/locale_provider.dart'; // Removed incorrect import
-import '../providers/work_provider.dart'; // For Global Summary
-import '../services/localization_service.dart';
+import '../../../core/providers/auth_provider.dart';
+import '../../../core/providers/driver_provider.dart';
+import '../../../core/providers/work_provider.dart'; // For Global Summary
+import '../../../core/services/localization_service.dart';
 import 'driver_profile_screen.dart';
-import '../widgets/delete_dialog.dart';
+import '../../components/dialogs/delete_dialog.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});

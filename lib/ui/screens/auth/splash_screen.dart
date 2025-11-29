@@ -3,15 +3,15 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:provider/provider.dart';
-import '../database/database.dart';
-import '../repositories/farmer_repository.dart';
-import '../repositories/work_repository.dart';
-import '../services/localization_service.dart';
-import '../providers/driver_provider.dart';
-import '../providers/auth_provider.dart';
-import '../providers/farmer_provider.dart';
-import '../providers/work_provider.dart';
-import '../main.dart'; // To access TractorKhataApp
+import '../../../data/local/database.dart';
+import '../../../data/repository/farmer_repository.dart';
+import '../../../data/repository/work_repository.dart';
+import '../../../core/services/localization_service.dart';
+import '../../../core/providers/driver_provider.dart';
+import '../../../core/providers/auth_provider.dart';
+import '../../../core/providers/farmer_provider.dart';
+import '../../../core/providers/work_provider.dart';
+import '../../../main.dart'; // To access TractorKhataApp
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});

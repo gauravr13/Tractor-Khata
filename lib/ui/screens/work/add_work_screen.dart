@@ -3,12 +3,12 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import 'package:drift/drift.dart' hide Column;
-import '../database/database.dart';
-import '../providers/work_provider.dart';
-import '../widgets/time_picker_popup.dart';
-import '../widgets/scale_button.dart';
-import '../services/localization_service.dart';
-import '../widgets/delete_dialog.dart';
+import '../../../data/local/database.dart';
+import '../../../core/providers/work_provider.dart';
+import '../../components/dialogs/time_picker_popup.dart';
+import '../../components/buttons/scale_button.dart';
+import '../../../core/services/localization_service.dart';
+import '../../components/dialogs/delete_dialog.dart';
 
 /// Add Work Screen - Final Rebuild
 /// Uses strictly tappable containers for time input.

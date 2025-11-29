@@ -20,26 +20,29 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:intl/date_symbol_data_local.dart';
 
 // --- Database Imports ---
-import 'database/database.dart';
+import 'data/local/database.dart';
 
 // --- Provider Imports ---
-import 'providers/auth_provider.dart';
-import 'providers/farmer_provider.dart';
-import 'providers/work_provider.dart';
-import 'providers/driver_provider.dart';
-import 'services/localization_service.dart';
+import 'core/providers/auth_provider.dart';
+import 'core/providers/farmer_provider.dart';
+import 'core/providers/work_provider.dart';
+import 'core/providers/driver_provider.dart';
+import 'core/services/localization_service.dart';
 
 // --- Repository Imports ---
-import 'repositories/farmer_repository.dart';
-import 'repositories/work_repository.dart';
+import 'data/repository/farmer_repository.dart';
+import 'data/repository/work_repository.dart';
 
 // --- Screen Imports ---
-import 'screens/login_screen.dart';
-import 'screens/farmer_list_screen.dart';
-import 'screens/add_farmer_screen.dart';
-import 'screens/settings_screen.dart';
-import 'screens/rate_card_screen.dart';
-import 'screens/add_work_type_screen.dart';
+import 'ui/screens/auth/login_screen.dart';
+import 'ui/screens/dashboard/farmer_list_screen.dart';
+import 'ui/screens/farmer/add_farmer_screen.dart';
+import 'ui/screens/settings/settings_screen.dart';
+import 'ui/screens/work/rate_card_screen.dart';
+import 'ui/screens/work/add_work_type_screen.dart';
+
+// --- Theme Import ---
+import 'ui/theme/app_theme.dart';
 
 /// ---------------------------------------------------------------------------
 /// Main Function
@@ -113,29 +116,15 @@ class TractorKhataApp extends StatelessWidget {
             GlobalCupertinoLocalizations.delegate,
           ],
           
-          // --- Theme Configuration ---
           theme: ThemeData(
             useMaterial3: true,
             colorScheme: ColorScheme.fromSeed(
               seedColor: Colors.green,
               primary: Colors.green,
-              secondary: Colors.greenAccent,
               surface: Colors.white,
-              surfaceTint: Colors.transparent,
             ),
-            scaffoldBackgroundColor: Colors.grey[50],
-            
-            textTheme: GoogleFonts.poppinsTextTheme(Theme.of(context).textTheme).apply(
-              bodyColor: Colors.black87,
-              displayColor: Colors.black87,
-            ),
-            
-            pageTransitionsTheme: PageTransitionsTheme(
-              builders: {
-                TargetPlatform.android: FadeSlideUpTransitionBuilder(),
-                TargetPlatform.iOS: FadeSlideUpTransitionBuilder(),
-              },
-            ),
+            scaffoldBackgroundColor: Colors.white,
+            textTheme: GoogleFonts.poppinsTextTheme(),
             
             appBarTheme: const AppBarTheme(
               backgroundColor: Colors.green,

@@ -8,8 +8,8 @@
 // =============================================================================
 
 import 'package:flutter/foundation.dart';
-import '../database/database.dart';
-import '../repositories/farmer_repository.dart';
+import '../../data/local/database.dart';
+import '../../data/repository/farmer_repository.dart';
 
 /// ---------------------------------------------------------------------------
 /// Class: FarmerProvider

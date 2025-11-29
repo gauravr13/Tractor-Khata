@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../services/localization_service.dart';
+import '../../../core/services/localization_service.dart';
 
 Future<bool?> showDeleteDialog(BuildContext context, {
   required String title,

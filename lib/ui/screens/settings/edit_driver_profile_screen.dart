@@ -3,11 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:image/image.dart' as img;
 import 'package:image_cropper/image_cropper.dart';
-import '../providers/driver_provider.dart';
-import '../services/localization_service.dart';
+import '../../../core/providers/driver_provider.dart';
+import '../../../core/services/localization_service.dart';
 
 class EditDriverProfileScreen extends StatefulWidget {
   const EditDriverProfileScreen({super.key});

@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../providers/work_provider.dart';
-import '../services/localization_service.dart';
+import '../../../core/providers/work_provider.dart';
+import '../../../core/services/localization_service.dart';
 import 'add_work_type_screen.dart';
-import '../database/database.dart';
-import '../widgets/delete_dialog.dart';
+import '../../../data/local/database.dart';
+import '../../components/dialogs/delete_dialog.dart';
 
 class RateCardScreen extends StatefulWidget {
   const RateCardScreen({super.key});

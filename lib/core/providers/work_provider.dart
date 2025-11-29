@@ -10,8 +10,8 @@
 // =============================================================================
 
 import 'package:flutter/foundation.dart';
-import '../database/database.dart';
-import '../repositories/work_repository.dart';
+import '../../data/local/database.dart';
+import '../../data/repository/work_repository.dart';
 
 /// ---------------------------------------------------------------------------
 /// Class: WorkProvider

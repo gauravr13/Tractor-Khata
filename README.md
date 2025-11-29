@@ -232,32 +232,18 @@ tractor-khata/
 │   ├── images/          # App logo and images
 │   └── translations/    # i18n JSON files (hi.json, en.json)
 ├── lib/
-│   ├── database/
-│   │   └── database.dart          # Drift database schema
-│   ├── providers/
-│   │   ├── auth_provider.dart
-│   │   ├── farmer_provider.dart
-│   │   ├── work_provider.dart
-│   │   ├── driver_provider.dart
-│   │   └── locale_provider.dart
-│   ├── repositories/
-│   │   ├── farmer_repository.dart
-│   │   └── work_repository.dart
-│   ├── screens/
-│   │   ├── login_screen.dart
-│   │   ├── farmer_list_screen.dart
-│   │   ├── farmer_profile_screen.dart
-│   │   ├── add_farmer_screen.dart
-│   │   ├── add_work_screen.dart
-│   │   ├── add_payment_screen.dart
-│   │   ├── rate_card_screen.dart
-│   │   ├── settings_screen.dart
-│   │   └── driver_profile_screen.dart
-│   ├── services/
-│   │   └── localization_service.dart
-│   ├── widgets/
-│   │   └── time_picker_popup.dart
-│   └── main.dart
+│   ├── core/             # Business logic & utilities
+│   │   ├── providers/    # State management
+│   │   ├── services/     # External services
+│   │   └── utils/        # Helper classes
+│   ├── data/             # Data layer
+│   │   ├── local/        # Local database (Drift)
+│   │   └── repository/   # Data repositories
+│   ├── ui/               # Presentation layer
+│   │   ├── components/   # Reusable widgets
+│   │   ├── screens/      # Application screens
+│   │   └── theme/        # App theme & styles
+│   └── main.dart         # Entry point
 ├── pubspec.yaml
 └── README.md
 ```
@@ -375,6 +361,13 @@ For issues, feature requests, or questions:
 ---
 
 ## 📝 Changelog
+
+### Version 1.2.0 (Current)
+- ♻️ **Major Refactoring:** Implemented Clean Architecture (UI, Core, Data layers).
+- 📂 **New Folder Structure:** Organized codebase for better scalability and maintainability.
+- 🎨 **Theme System:** Centralized theming with `AppTheme`, `AppColors`, and `AppTypography`.
+- 🧹 **Code Cleanup:** Removed unused files and optimized imports.
+- 📄 **Documentation:** Added detailed architecture and folder structure guides.
 
 ### Version 1.1.0 (November 25, 2024)
 - ✨ Redesigned work and payment cards with improved spacing

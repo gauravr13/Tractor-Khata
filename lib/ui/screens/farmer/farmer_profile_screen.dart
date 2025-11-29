@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
-import '../database/database.dart';
-import '../providers/farmer_provider.dart';
-import '../providers/work_provider.dart';
-import '../services/localization_service.dart';
-import 'add_work_screen.dart';
-import 'add_payment_screen.dart';
+import '../../../data/local/database.dart';
+import '../../../core/providers/farmer_provider.dart';
+import '../../../core/providers/work_provider.dart';
+import '../../../core/services/localization_service.dart';
+import '../work/add_work_screen.dart';
+import '../work/add_payment_screen.dart';
 import 'add_farmer_screen.dart';
-import '../widgets/staggered_list_item.dart';
-import '../widgets/scale_button.dart';
-import '../widgets/delete_dialog.dart';
-import '../utils/color_utils.dart';
+import '../../components/list_items/staggered_list_item.dart';
+import '../../components/buttons/scale_button.dart';
+import '../../components/dialogs/delete_dialog.dart';
+import '../../../core/utils/color_utils.dart';
 
 class FarmerProfileScreen extends StatefulWidget {
   final int farmerId;

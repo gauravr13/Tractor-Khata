@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:drift/drift.dart' hide Column;
-import '../database/database.dart';
-import '../providers/farmer_provider.dart';
-import '../services/localization_service.dart';
-import '../widgets/scale_button.dart';
-import '../widgets/animated_bottom_sheet.dart';
+import '../../../data/local/database.dart';
+import '../../../core/providers/farmer_provider.dart';
+import '../../../core/services/localization_service.dart';
+import '../../components/buttons/scale_button.dart';
+import '../../components/dialogs/animated_bottom_sheet.dart';
 
 class AddFarmerScreen extends StatefulWidget {
   final Farmer? farmerToEdit;

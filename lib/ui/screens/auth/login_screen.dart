@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../providers/auth_provider.dart';
-import '../services/localization_service.dart';
-import '../providers/driver_provider.dart';
-import '../widgets/scale_button.dart';
+import '../../../core/providers/auth_provider.dart';
+import '../../../core/services/localization_service.dart';
+import '../../../core/providers/driver_provider.dart';
+import '../../components/buttons/scale_button.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
