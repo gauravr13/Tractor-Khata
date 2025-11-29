@@ -81,7 +81,6 @@ lib/generated_plugin_registrant.dart
 
 # Firebase
 firebase_app_id_file.json
-google-services.json
 GoogleService-Info.plist
 
 # Sensitive files
@@ -94,3 +93,5 @@ key.properties
 
 # Agent configuration
 .agent/
+
+# Firebase Config
