@@ -1,4 +1,3 @@
-
 ## 📱 For End Users
 
 Looking for a simple guide on how to use the app?  
@@ -126,13 +125,18 @@ The entire application is designed with a **Hindi-first approach**, featuring na
 **Code Organization:**
 ```
 lib/
-├── database/          # Drift database models and DAOs
-├── providers/         # State management providers
-├── repositories/      # Data access layer
-├── screens/          # UI screens
-├── services/         # Business logic services
-├── widgets/          # Reusable custom widgets
-└── main.dart         # App entry point
+├── core/             # Business logic & utilities
+│   ├── providers/    # State management
+│   ├── services/     # External services
+│   └── utils/        # Helper classes
+├── data/             # Data layer
+│   ├── local/        # Local database (Drift)
+│   └── repository/   # Data repositories
+├── ui/               # Presentation layer
+│   ├── components/   # Reusable widgets
+│   ├── screens/      # Application screens
+│   └── theme/        # App theme & styles
+└── main.dart         # Entry point
 ```
 
 ---
@@ -163,18 +167,7 @@ This application operates in **offline mode** by default:
 
 ---
 
-## 📥 Installation
-
-### For End Users
-
-1. Download the latest APK from [Releases](https://github.com/YOUR_USERNAME/tractor-khata/releases)
-2. Enable "Install from Unknown Sources" in Android settings if prompted
-3. Install the APK
-4. Sign in with your Google account
-5. Grant necessary permissions (camera, storage for profile photos)
-6. Start managing your work records!
-
-### For Developers
+## 🛠️ How to Run Locally
 
 **Prerequisites:**
 - Flutter SDK 3.9.2 or higher
@@ -211,13 +204,6 @@ flutter pub run build_runner build --delete-conflicting-outputs
 ```bash
 flutter run
 ```
-
-**Build Release APK:**
-```bash
-flutter build apk --release
-```
-
-Output: `build/app/outputs/flutter-apk/app-release.apk`
 
 ---
 
@@ -299,34 +285,6 @@ _Screenshots coming soon..._
 
 ---
 
-## 🤝 Contributing
-
-Contributions are welcome! This is an open-source project designed to help tractor drivers manage their business more efficiently.
-
-**How to Contribute:**
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
-**Contribution Guidelines:**
-- Follow Flutter/Dart style guidelines
-- Maintain backward compatibility
-- Add tests for new features
-- Update documentation
-- Ensure the app works offline
-- Test on multiple Android versions
-
----
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
----
-
 ## 👨‍💻 Author
 
 Created with ❤️ for the tractor driver community of India.
@@ -347,7 +305,6 @@ For issues, feature requests, or questions:
 - Flutter team for the amazing framework
 - Firebase for authentication services
 - Drift team for the excellent ORM
-- All contributors and users
 
 ---
 
