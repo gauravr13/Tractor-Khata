@@ -91,3 +91,6 @@ key.properties
 
 # macOS
 .DS_Store
+
+# Agent configuration
+.agent/
