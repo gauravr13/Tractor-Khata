@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../database/database.dart';
 import '../providers/work_provider.dart';
 import '../services/localization_service.dart';
+import 'add_work_type_screen.dart';
+import '../database/database.dart';
+import '../widgets/delete_dialog.dart';
 
-/// Rate Card Screen.
-/// Displays a list of work types and their default rates.
 class RateCardScreen extends StatefulWidget {
   const RateCardScreen({super.key});
 
@@ -22,27 +22,16 @@ class _RateCardScreenState extends State<RateCardScreen> {
     });
   }
 
-  Future<void> _deleteWorkType(WorkType workType) async {
+  void _deleteWorkType(WorkType workType) async {
     final locale = AppLocalizations.of(context)!;
-    final confirm = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(locale.translate('rate_card.delete_confirm_title')),
-        content: Text(locale.translate('rate_card.delete_confirm_message')),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: Text(locale.translate('common.cancel')),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: Text(locale.translate('common.delete'), style: const TextStyle(color: Colors.red)),
-          ),
-        ],
-      ),
+    final confirm = await showDeleteDialog(
+      context,
+      title: locale.translate('rate_card.delete_confirm_title'),
+      content: locale.translate('rate_card.delete_confirm_message', params: {'name': workType.name}),
     );
 
-    if (confirm == true && mounted) {
+    if (confirm == true) {
+      if (!mounted) return;
       await Provider.of<WorkProvider>(context, listen: false).deleteWorkType(workType);
     }
   }
@@ -50,41 +39,74 @@ class _RateCardScreenState extends State<RateCardScreen> {
   @override
   Widget build(BuildContext context) {
     final locale = AppLocalizations.of(context)!;
+
     return Scaffold(
+      backgroundColor: Colors.grey[50], // Soft background
       appBar: AppBar(
         title: Text(locale.translate('rate_card.title')),
+        elevation: 0,
       ),
       body: Consumer<WorkProvider>(
         builder: (context, provider, child) {
+          if (provider.isLoading) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
           if (provider.workTypes.isEmpty) {
             return Center(
-              child: Text(
-                locale.translate('rate_card.no_work_types'),
-                textAlign: TextAlign.center,
-                style: const TextStyle(fontSize: 18, color: Colors.grey),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.list_alt_rounded, size: 64, color: Colors.grey[300]),
+                  const SizedBox(height: 16),
+                  Text(
+                    locale.translate('rate_card.no_work_types'),
+                    style: const TextStyle(fontSize: 18, color: Colors.grey),
+                  ),
+                ],
               ),
             );
           }
 
           return ListView.builder(
+            padding: const EdgeInsets.all(16),
             itemCount: provider.workTypes.length,
             itemBuilder: (context, index) {
               final workType = provider.workTypes[index];
               return Card(
-                margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                color: Colors.white,
+                surfaceTintColor: Colors.transparent,
+                margin: const EdgeInsets.only(bottom: 12),
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  side: BorderSide(color: Colors.grey.shade200),
+                ),
                 child: ListTile(
+                  contentPadding: const EdgeInsets.all(16),
+                  leading: Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: Colors.blue.shade50,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Icon(Icons.agriculture_rounded, color: Colors.blue),
+                  ),
                   title: Text(
                     workType.name,
-                    style: const TextStyle(fontWeight: FontWeight.w600),
+                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
-                  subtitle: Text('${locale.translate('add_work.rate_per_hour')}: ₹${workType.ratePerHour.toStringAsFixed(0)} / ${locale.translate('rate_card.per_hour')}'),
+                  subtitle: Padding(
+                    padding: const EdgeInsets.only(top: 4),
+                    child: Text(
+                      '₹${workType.ratePerHour.toStringAsFixed(0)} / ${locale.translate('add_work.hour')}',
+                      style: TextStyle(fontSize: 15, color: Colors.grey.shade700, fontWeight: FontWeight.w500),
+                    ),
+                  ),
                   trailing: IconButton(
-                    icon: const Icon(Icons.delete, color: Colors.red),
+                    icon: Icon(Icons.delete_rounded, color: Colors.red.shade400),
                     onPressed: () => _deleteWorkType(workType),
                   ),
-                  onTap: () {
-                    // Edit functionality can be added in future versions
-                  },
                 ),
               );
             },
@@ -92,11 +114,20 @@ class _RateCardScreenState extends State<RateCardScreen> {
         },
       ),
       floatingActionButton: FloatingActionButton.extended(
+        backgroundColor: Colors.green,
+        foregroundColor: Colors.white,
+        elevation: 4,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         onPressed: () {
-          Navigator.pushNamed(context, '/add_work_type');
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const AddWorkTypeScreen()),
+          ).then((_) {
+            Provider.of<WorkProvider>(context, listen: false).loadWorkTypes();
+          });
         },
-        label: Text(locale.translate('rate_card.add_work_type')),
-        icon: const Icon(Icons.add),
+        label: Text(locale.translate('rate_card.add_work_type'), style: const TextStyle(fontWeight: FontWeight.w600)),
+        icon: const Icon(Icons.add_rounded),
       ),
     );
   }

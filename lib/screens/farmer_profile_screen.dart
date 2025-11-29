@@ -10,6 +10,8 @@ import 'add_payment_screen.dart';
 import 'add_farmer_screen.dart';
 import '../widgets/staggered_list_item.dart';
 import '../widgets/scale_button.dart';
+import '../widgets/delete_dialog.dart';
+import '../utils/color_utils.dart';
 
 class FarmerProfileScreen extends StatefulWidget {
   final int farmerId;
@@ -39,22 +41,10 @@ class _FarmerProfileScreenState extends State<FarmerProfileScreen> {
 
   Future<void> _deleteFarmer(Farmer farmer) async {
     final locale = AppLocalizations.of(context)!;
-    final confirm = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(locale.translate('farmer_profile.delete_confirm_title')),
-        content: Text(locale.translate('farmer_profile.delete_confirm_message', params: {'name': farmer.name})),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: Text(locale.translate('common.cancel')),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: Text(locale.translate('common.delete'), style: const TextStyle(color: Colors.red)),
-          ),
-        ],
-      ),
+    final confirm = await showDeleteDialog(
+      context,
+      title: locale.translate('farmer_profile.delete_confirm_title'),
+      content: locale.translate('farmer_profile.delete_confirm_message', params: {'name': farmer.name}),
     );
 
     if (confirm == true) {
@@ -70,136 +60,158 @@ class _FarmerProfileScreenState extends State<FarmerProfileScreen> {
   @override
   Widget build(BuildContext context) {
     final locale = AppLocalizations.of(context)!;
-    return Consumer<FarmerProvider>(
-      builder: (context, farmerProvider, child) {
-        final farmer = farmerProvider.farmers.firstWhere(
-          (f) => f.id == widget.farmerId,
-          orElse: () => throw Exception('Farmer not found'),
-        );
+    final farmerProvider = Provider.of<FarmerProvider>(context);
+    
+    // Handle case where farmer might be deleted
+    if (!farmerProvider.farmers.any((f) => f.id == widget.farmerId)) {
+      return const SizedBox.shrink();
+    }
 
-        return Scaffold(
-          appBar: AppBar(
-            title: Text(farmer.name),
-            actions: [
-              ScaleButton(
+    final farmer = farmerProvider.farmers.firstWhere((f) => f.id == widget.farmerId);
+
+    return Scaffold(
+      backgroundColor: Colors.grey[50],
+      appBar: AppBar(
+        title: Text(farmer.name),
+        elevation: 0,
+        actions: [
+          ScaleButton(
+            onPressed: () {
+              showModalBottomSheet(
+                context: context,
+                isScrollControlled: true,
+                backgroundColor: Colors.transparent,
+                builder: (context) => AddFarmerScreen(farmerToEdit: farmer, isBottomSheet: true),
+              ).then((_) => _loadData());
+            },
+            child: const Padding(
+              padding: EdgeInsets.all(8.0),
+              child: Icon(Icons.edit_rounded),
+            ),
+          ),
+          ScaleButton(
+            onPressed: () => _deleteFarmer(farmer),
+            child: const Padding(
+              padding: EdgeInsets.all(8.0),
+              child: Icon(Icons.delete_rounded),
+            ),
+          ),
+        ],
+      ),
+      body: Consumer<WorkProvider>(
+        builder: (context, provider, child) {
+          if (provider.isLoading) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          return Column(
+            children: [
+              _buildHeader(context, farmer),
+              Expanded(
+                child: provider.transactions.isEmpty
+                    ? Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.history_rounded, size: 64, color: Colors.grey[300]),
+                            const SizedBox(height: 16),
+                            Text(
+                              locale.translate('farmer_profile.no_transactions'),
+                              style: TextStyle(fontSize: 18, color: Colors.grey[500]),
+                            ),
+                          ],
+                        ),
+                      )
+                    : ListView.builder(
+                        padding: const EdgeInsets.only(bottom: 100, top: 16), // Space for FABs
+                        itemCount: provider.transactions.length,
+                        itemBuilder: (context, index) {
+                          final item = provider.transactions[index];
+                          if (item is Work) {
+                            return _buildWorkCard(context, item, provider.workTypes);
+                          } else if (item is Payment) {
+                            return _buildPaymentCard(context, item);
+                          }
+                          return const SizedBox.shrink();
+                        },
+                      ),
+              ),
+            ],
+          );
+        },
+      ),
+      floatingActionButton: _buildFloatingActionButtons(context, farmer),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+    );
+  }
+
+  Widget _buildFloatingActionButtons(BuildContext context, Farmer farmer) {
+    final locale = AppLocalizations.of(context)!;
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Row(
+        children: [
+          Expanded(
+            child: SizedBox(
+              height: 56,
+              child: ElevatedButton.icon(
                 onPressed: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => AddFarmerScreen(farmerToEdit: farmer)),
+                    MaterialPageRoute(builder: (context) => AddPaymentScreen(farmerId: farmer.id)),
                   ).then((_) => _loadData());
                 },
-                child: const Padding(
-                  padding: EdgeInsets.all(8.0),
-                  child: Icon(Icons.edit),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.green,
+                  foregroundColor: Colors.white,
+                  elevation: 4,
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                 ),
-              ),
-              ScaleButton(
-                onPressed: () => _deleteFarmer(farmer),
-                child: const Padding(
-                  padding: EdgeInsets.all(8.0),
-                  child: Icon(Icons.delete),
+                icon: const Icon(Icons.payments_outlined, size: 24),
+                label: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
+                    locale.translate('farmer_profile.receive_payment'),
+                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                    maxLines: 1,
+                  ),
                 ),
-              ),
-              const SizedBox(width: 8),
-            ],
-          ),
-          body: Column(
-            children: [
-              _buildHeader(context, farmer),
-              const Divider(height: 1),
-              Expanded(
-                child: Consumer<WorkProvider>(
-                  builder: (context, workProvider, child) {
-                    if (workProvider.isLoading) {
-                      return Center(child: Text(locale.translate('common.loading')));
-                    }
-
-                    if (workProvider.transactions.isEmpty) {
-                      return Center(child: Text(locale.translate('farmer_profile.no_history')));
-                    }
-
-                    return ListView.builder(
-                      padding: const EdgeInsets.only(bottom: 100, top: 8),
-                      itemCount: workProvider.transactions.length,
-                      cacheExtent: 1000, // Preload for smooth scrolling
-                      itemBuilder: (context, index) {
-                        final item = workProvider.transactions[index];
-                        Widget child = const SizedBox.shrink();
-                        
-                        if (item is Work) {
-                          child = _buildWorkCard(context, item, workProvider.workTypes);
-                        } else if (item is Payment) {
-                          child = _buildPaymentCard(context, item);
-                        }
-                        
-                        return StaggeredListItem(
-                          index: index,
-                          child: child,
-                        );
-                      },
-                    );
-                  },
-                ),
-              ),
-            ],
-          ),
-          floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-          floatingActionButton: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: TweenAnimationBuilder<double>(
-              tween: Tween(begin: 0.0, end: 1.0),
-              duration: const Duration(milliseconds: 500),
-              curve: Curves.easeOutBack,
-              builder: (context, value, child) {
-                return Transform.translate(
-                  offset: Offset(0, 50 * (1 - value)), // Slide up
-                  child: Opacity(
-                    opacity: value,
-                    child: child,
-                  ),
-                );
-              },
-              child: Row(
-                children: [
-                  Expanded(
-                    child: FloatingActionButton.extended(
-                      heroTag: 'payment',
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => AddPaymentScreen(farmerId: farmer.id)),
-                        ).then((_) => _loadData());
-                      },
-                      backgroundColor: Colors.green,
-                      foregroundColor: Colors.white,
-                      label: Text(locale.translate('farmer_profile.receive_payment')),
-                      icon: const Icon(Icons.currency_rupee),
-                      elevation: 4,
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: FloatingActionButton.extended(
-                      heroTag: 'work',
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => AddWorkScreen(farmerId: farmer.id)),
-                        ).then((_) => _loadData());
-                      },
-                      backgroundColor: Theme.of(context).primaryColor,
-                      foregroundColor: Colors.white,
-                      label: Text(locale.translate('farmer_profile.add_work')),
-                      icon: const Icon(Icons.add_task),
-                      elevation: 4,
-                    ),
-                  ),
-                ],
               ),
             ),
           ),
-        );
-      },
+          const SizedBox(width: 16),
+          Expanded(
+            child: SizedBox(
+              height: 56,
+              child: ElevatedButton.icon(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => AddWorkScreen(farmerId: farmer.id)),
+                  ).then((_) => _loadData());
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blue, // Matches Tractor icon color
+                  foregroundColor: Colors.white,
+                  elevation: 4,
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                ),
+                icon: const Icon(Icons.agriculture_rounded, size: 24), // Tractor icon
+                label: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
+                    locale.translate('farmer_profile.add_work'),
+                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                    maxLines: 1,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -209,17 +221,31 @@ class _FarmerProfileScreenState extends State<FarmerProfileScreen> {
       builder: (context, provider, _) {
         return Container(
           padding: const EdgeInsets.all(16),
-          color: Colors.white,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: const BorderRadius.vertical(bottom: Radius.circular(24)),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.05),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
           child: Column(
             children: [
               Row(
                 children: [
-                  Hero(
-                    tag: 'avatar_${farmer.id}',
-                    child: CircleAvatar(
-                      radius: 24,
-                      backgroundColor: Colors.blue.shade100,
-                      child: Text(farmer.name[0].toUpperCase(), style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w600)),
+                  CircleAvatar(
+                    radius: 28,
+                    backgroundColor: ColorUtils.getAvatarColor(farmer.name).withValues(alpha: 0.35),
+                    child: Text(
+                      farmer.name[0].toUpperCase(), 
+                      style: TextStyle(
+                        fontSize: 24, 
+                        fontWeight: FontWeight.bold, 
+                        color: ColorUtils.getAvatarColor(farmer.name)
+                      )
                     ),
                   ),
                   const SizedBox(width: 16),
@@ -227,47 +253,57 @@ class _FarmerProfileScreenState extends State<FarmerProfileScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(farmer.name, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w600)),
-                        if (farmer.phone != null) Text(farmer.phone!, style: const TextStyle(color: Colors.grey)),
+                        Text(farmer.name, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                        if (farmer.phone != null) 
+                          Row(
+                            children: [
+                              Icon(Icons.phone_rounded, size: 14, color: Colors.grey.shade500),
+                              const SizedBox(width: 4),
+                              Text(farmer.phone!, style: const TextStyle(color: Colors.grey, fontSize: 14)),
+                            ],
+                          ),
                       ],
                     ),
                   ),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
-                      Text(locale.translate('farmer_profile.works_count', params: {'count': provider.farmerWorkCount.toString()}), style: const TextStyle(fontSize: 12, color: Colors.grey)),
+                      Text(
+                        locale.translate('farmer_profile.works_count', params: {'count': provider.farmerWorkCount.toString()}), 
+                        style: TextStyle(fontSize: 12, color: Colors.grey.shade600, fontWeight: FontWeight.w500)
+                      ),
                     ],
                   ),
                 ],
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 20),
               Row(
                 children: [
                   Expanded(
                     child: Container(
                       padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(color: Colors.red.shade50, borderRadius: BorderRadius.circular(8)),
+                      decoration: BoxDecoration(color: Colors.red.shade50, borderRadius: BorderRadius.circular(12)),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(locale.translate('farmer_profile.pending'), style: TextStyle(color: Colors.red.shade700, fontSize: 12)),
+                          Text(locale.translate('farmer_profile.pending'), style: TextStyle(color: Colors.red.shade700, fontSize: 13, fontWeight: FontWeight.w600)),
                           const SizedBox(height: 4),
-                          Text('₹${provider.farmerPendingAmount.toStringAsFixed(0)}', style: TextStyle(color: Colors.red.shade900, fontSize: 18, fontWeight: FontWeight.w600)),
+                          Text('₹${provider.farmerPendingAmount.toStringAsFixed(0)}', style: TextStyle(color: Colors.red.shade900, fontSize: 20, fontWeight: FontWeight.bold)),
                         ],
                       ),
                     ),
                   ),
-                  const SizedBox(width: 16),
+                  const SizedBox(width: 12),
                   Expanded(
                     child: Container(
                       padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(color: Colors.green.shade50, borderRadius: BorderRadius.circular(8)),
+                      decoration: BoxDecoration(color: Colors.green.shade50, borderRadius: BorderRadius.circular(12)),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(locale.translate('farmer_profile.received'), style: TextStyle(color: Colors.green.shade700, fontSize: 12)),
+                          Text(locale.translate('farmer_profile.received'), style: TextStyle(color: Colors.green.shade700, fontSize: 13, fontWeight: FontWeight.w600)),
                           const SizedBox(height: 4),
-                          Text('₹${provider.farmerTotalReceived.toStringAsFixed(0)}', style: TextStyle(color: Colors.green.shade900, fontSize: 18, fontWeight: FontWeight.w600)),
+                          Text('₹${provider.farmerTotalReceived.toStringAsFixed(0)}', style: TextStyle(color: Colors.green.shade900, fontSize: 20, fontWeight: FontWeight.bold)),
                         ],
                       ),
                     ),
@@ -287,6 +323,8 @@ class _FarmerProfileScreenState extends State<FarmerProfileScreen> {
         types.firstWhere((t) => t.id == work.workTypeId, orElse: () => WorkType(id: -1, name: 'Unknown', ratePerHour: 0, createdAt: DateTime.now(), updatedAt: DateTime.now())).name;
 
     return Card(
+      color: Colors.white,
+      surfaceTintColor: Colors.transparent,
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       elevation: 0,
       shape: RoundedRectangleBorder(
@@ -310,66 +348,81 @@ class _FarmerProfileScreenState extends State<FarmerProfileScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Container(
-                    padding: const EdgeInsets.all(12),
+                    padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
                       color: Colors.blue.shade50,
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: const Icon(Icons.agriculture, color: Colors.blue, size: 28),
+                    child: const Icon(Icons.agriculture_rounded, color: Colors.blue, size: 24),
                   ),
                   const SizedBox(width: 16),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          typeName,
-                          style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 17, height: 1.2),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Expanded(
+                              child: Text(
+                                typeName,
+                                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, height: 1.2),
+                              ),
+                            ),
+                            Text(
+                              '₹${work.totalAmount.toStringAsFixed(0)}',
+                              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.red.shade700),
+                            ),
+                          ],
                         ),
                         const SizedBox(height: 6),
                         Row(
                           children: [
-                            Icon(Icons.calendar_today, size: 14, color: Colors.grey.shade600),
+                            Icon(Icons.calendar_today_rounded, size: 14, color: Colors.grey.shade500),
                             const SizedBox(width: 4),
                             Text(
                               DateFormat('d MMM', locale.locale.languageCode).format(work.workDate),
-                              style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
+                              style: TextStyle(color: Colors.grey.shade600, fontSize: 13, fontWeight: FontWeight.w500),
                             ),
                             const SizedBox(width: 12),
-                            Icon(Icons.access_time, size: 14, color: Colors.grey.shade600),
+                            Icon(Icons.access_time_rounded, size: 14, color: Colors.grey.shade500),
                             const SizedBox(width: 4),
                             Text(
                               '${work.durationInMinutes} ${locale.translate('add_work.minutes')}',
-                              style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
+                              style: TextStyle(color: Colors.grey.shade600, fontSize: 13, fontWeight: FontWeight.w500),
                             ),
                           ],
                         ),
+                        if (work.notes != null && work.notes!.isNotEmpty) ...[
+                          const SizedBox(height: 8),
+                          Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: Colors.grey.shade50,
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Icon(Icons.edit_note_rounded, size: 16, color: Colors.grey.shade500),
+                                const SizedBox(width: 6),
+                                Expanded(
+                                  child: Text(
+                                    work.notes!,
+                                    style: TextStyle(fontSize: 13, color: Colors.grey.shade700, height: 1.3),
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
                       ],
                     ),
                   ),
-                  const SizedBox(width: 8),
-                  Text(
-                    '₹${work.totalAmount.toStringAsFixed(0)}',
-                    style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black87),
-                  ),
                 ],
               ),
-              if (work.notes != null && work.notes!.isNotEmpty) ...[
-                const SizedBox(height: 12),
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: Colors.grey.shade50,
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: Colors.grey.shade100),
-                  ),
-                  child: Text(
-                    work.notes!,
-                    style: TextStyle(fontSize: 13, color: Colors.grey.shade800, height: 1.4),
-                  ),
-                ),
-              ],
             ],
           ),
         ),
@@ -380,6 +433,8 @@ class _FarmerProfileScreenState extends State<FarmerProfileScreen> {
   Widget _buildPaymentCard(BuildContext context, Payment payment) {
     final locale = AppLocalizations.of(context)!;
     return Card(
+      color: Colors.white,
+      surfaceTintColor: Colors.transparent,
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       elevation: 0,
       shape: RoundedRectangleBorder(
@@ -403,59 +458,72 @@ class _FarmerProfileScreenState extends State<FarmerProfileScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Container(
-                    padding: const EdgeInsets.all(12),
+                    padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
                       color: Colors.green.shade50,
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: const Icon(Icons.currency_rupee, color: Colors.green, size: 28),
+                    child: const Icon(Icons.payments_outlined, color: Colors.green, size: 24),
                   ),
                   const SizedBox(width: 16),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          locale.translate('farmer_profile.payment_received'),
-                          style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 17, height: 1.2),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              locale.translate('farmer_profile.payment_received'),
+                              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, height: 1.2),
+                            ),
+                            Text(
+                              '₹${payment.amount.toStringAsFixed(0)}',
+                              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.green),
+                            ),
+                          ],
                         ),
                         const SizedBox(height: 6),
                         Row(
                           children: [
-                            Icon(Icons.calendar_today, size: 14, color: Colors.grey.shade600),
+                            Icon(Icons.calendar_today_rounded, size: 14, color: Colors.grey.shade500),
                             const SizedBox(width: 4),
                             Text(
                               DateFormat('d MMM yyyy', locale.locale.languageCode).format(payment.date),
-                              style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
+                              style: TextStyle(color: Colors.grey.shade600, fontSize: 13, fontWeight: FontWeight.w500),
                             ),
                           ],
                         ),
+                        if (payment.notes != null && payment.notes!.isNotEmpty) ...[
+                          const SizedBox(height: 8),
+                          Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: Colors.grey.shade50,
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Icon(Icons.edit_note_rounded, size: 16, color: Colors.grey.shade500),
+                                const SizedBox(width: 6),
+                                Expanded(
+                                  child: Text(
+                                    payment.notes!,
+                                    style: TextStyle(fontSize: 13, color: Colors.grey.shade700, height: 1.3),
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
                       ],
                     ),
                   ),
-                  const SizedBox(width: 8),
-                  Text(
-                    '₹${payment.amount.toStringAsFixed(0)}',
-                    style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.green),
-                  ),
                 ],
               ),
-              if (payment.notes != null && payment.notes!.isNotEmpty) ...[
-                const SizedBox(height: 12),
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: Colors.grey.shade50,
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: Colors.grey.shade100),
-                  ),
-                  child: Text(
-                    payment.notes!,
-                    style: TextStyle(fontSize: 13, color: Colors.grey.shade800, height: 1.4),
-                  ),
-                ),
-              ],
             ],
           ),
         ),
@@ -463,8 +531,3 @@ class _FarmerProfileScreenState extends State<FarmerProfileScreen> {
     );
   }
 }
-
-
-
-
-

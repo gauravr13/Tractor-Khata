@@ -96,8 +96,9 @@ class _EditDriverProfileScreenState extends State<EditDriverProfileScreen> {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      builder: (context) => Padding(
-        padding: const EdgeInsets.all(16.0),
+      builder: (context) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -128,6 +129,7 @@ class _EditDriverProfileScreenState extends State<EditDriverProfileScreen> {
               ),
           ],
         ),
+      ),
       ),
     );
   }

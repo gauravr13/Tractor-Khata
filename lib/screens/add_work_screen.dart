@@ -5,9 +5,10 @@ import 'package:intl/intl.dart';
 import 'package:drift/drift.dart' hide Column;
 import '../database/database.dart';
 import '../providers/work_provider.dart';
-import '../widgets/ios_time_picker.dart';
+import '../widgets/time_picker_popup.dart';
 import '../widgets/scale_button.dart';
 import '../services/localization_service.dart';
+import '../widgets/delete_dialog.dart';
 
 /// Add Work Screen - Final Rebuild
 /// Uses strictly tappable containers for time input.
@@ -115,26 +116,25 @@ class _AddWorkScreenState extends State<AddWorkScreen> with SingleTickerProvider
   }
 
   Future<void> _pickTime(bool isStart) async {
+    final locale = AppLocalizations.of(context)!;
     final initial = isStart ? (_startTime ?? TimeOfDay.now()) : (_endTime ?? TimeOfDay.now());
     
-    await showModalBottomSheet(
+    final picked = await showTimePickerPopup(
       context: context,
-      backgroundColor: Colors.transparent,
-      isScrollControlled: true,
-      builder: (context) => IOSTimePicker(
-        initialTime: initial,
-        onTimeChanged: (newTime) {
-          setState(() {
-            if (isStart) {
-              _startTime = newTime;
-            } else {
-              _endTime = newTime;
-            }
-            _calculateTotalTime();
-          });
-        },
-      ),
+      initialTime: initial,
+      isHindi: locale.locale.languageCode == 'hi',
     );
+    
+    if (picked != null) {
+      setState(() {
+        if (isStart) {
+          _startTime = picked;
+        } else {
+          _endTime = picked;
+        }
+        _calculateTotalTime();
+      });
+    }
   }
 
   Future<void> _saveWork() async {
@@ -231,17 +231,16 @@ class _AddWorkScreenState extends State<AddWorkScreen> with SingleTickerProvider
           child: Text(title, key: ValueKey(title)),
         ),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Form(
-          key: _formKey,
-          child: ListView(
-            children: [
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Form(
+            key: _formKey,
+            child: ListView(
+              padding: const EdgeInsets.only(bottom: 24), // Extra padding for buttons
+              children: [
               // 1. Date
-              ListTile(
-                title: Text(locale.translate('add_work.work_date')),
-                subtitle: Text(DateFormat('dd MMM yyyy').format(_selectedDate)),
-                trailing: const Icon(Icons.calendar_today),
+              InkWell(
                 onTap: () async {
                   final picked = await showDatePicker(
                     context: context,
@@ -251,45 +250,121 @@ class _AddWorkScreenState extends State<AddWorkScreen> with SingleTickerProvider
                   );
                   if (picked != null) setState(() => _selectedDate = picked);
                 },
-                shape: RoundedRectangleBorder(side: const BorderSide(color: Colors.grey), borderRadius: BorderRadius.circular(8)),
+                borderRadius: BorderRadius.circular(12),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    border: Border.all(color: Colors.grey.shade300),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(Icons.calendar_month_rounded, color: Colors.green.shade600, size: 28),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(locale.translate('add_work.work_date'), style: TextStyle(fontSize: 12, color: Colors.grey[600], fontWeight: FontWeight.w500)),
+                            const SizedBox(height: 4),
+                            Text(
+                              DateFormat('dd MMM yyyy').format(_selectedDate),
+                              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.black87),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const Icon(Icons.arrow_drop_down, color: Colors.grey),
+                    ],
+                  ),
+                ),
               ),
               const SizedBox(height: 16),
 
               // 2. Work Type
-              DropdownButtonFormField<int>(
-                initialValue: (_selectedWorkTypeId != null && 
-                        (workProvider.workTypes.any((t) => t.id == _selectedWorkTypeId) || _selectedWorkTypeId == -1))
-                    ? _selectedWorkTypeId 
-                    : null,
-                decoration: InputDecoration(
-                  labelText: locale.translate('add_work.work_type_label'), 
-                  prefixIcon: const Icon(Icons.work), 
-                  border: const OutlineInputBorder(),
-                  floatingLabelBehavior: FloatingLabelBehavior.always,
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  border: Border.all(color: Colors.grey.shade300),
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.03),
+                      blurRadius: 4,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
                 ),
-                items: [
-                  ...workProvider.workTypes.map((t) => DropdownMenuItem(value: t.id, child: Text(t.name))),
-                  DropdownMenuItem(value: -1, child: Text('+ ${locale.translate('add_work.custom_work_name')}')),
-                ],
-                onChanged: (val) {
-                  setState(() {
-                    if (val == -1) {
-                      _isCustomWork = true;
-                      _selectedWorkTypeId = null;
-                      _rateController.clear();
-                    } else {
-                      _isCustomWork = false;
-                      _selectedWorkTypeId = val;
-                      try {
-                        final type = workProvider.workTypes.firstWhere((t) => t.id == val);
-                        _rateController.text = type.ratePerHour.toStringAsFixed(0);
-                        if (_startTime != null && _endTime != null) _calculateTotalTime();
-                      } catch (_) {}
-                    }
-                    if (!_isCustomWork) _customWorkNameController.clear();
-                  });
-                },
-                validator: (val) => !_isCustomWork && (val == null || val == -1) ? locale.translate('add_work.select_work_type_error') : null,
+                child: DropdownButtonHideUnderline(
+                  child: DropdownButton<int>(
+                    value: (_selectedWorkTypeId != null && 
+                            (workProvider.workTypes.any((t) => t.id == _selectedWorkTypeId) || _selectedWorkTypeId == -1))
+                        ? _selectedWorkTypeId 
+                        : null,
+                    isExpanded: true,
+                    icon: const Icon(Icons.keyboard_arrow_down_rounded, color: Colors.green, size: 28),
+                    hint: Text(locale.translate('add_work.work_type_label'), style: TextStyle(color: Colors.grey[600], fontSize: 15)),
+                    borderRadius: BorderRadius.circular(16),
+                    dropdownColor: Colors.white,
+                    style: const TextStyle(fontSize: 16, color: Colors.black87, fontWeight: FontWeight.w500),
+                    items: [
+                      ...workProvider.workTypes.map((t) => DropdownMenuItem(
+                        value: t.id, 
+                        child: Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: Colors.blue.shade50,
+                                shape: BoxShape.circle,
+                              ),
+                              child: Icon(Icons.agriculture, size: 20, color: Colors.blue.shade700),
+                            ),
+                            const SizedBox(width: 12),
+                            Text(t.name),
+                          ],
+                        ),
+                      )),
+                      DropdownMenuItem(
+                        value: -1, 
+                        child: Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: Colors.blue.shade50,
+                                shape: BoxShape.circle,
+                              ),
+                              child: Icon(Icons.edit, size: 20, color: Colors.blue.shade700),
+                            ),
+                            const SizedBox(width: 12),
+                            Text(locale.translate('add_work.custom_work_name'), style: TextStyle(color: Colors.blue.shade700, fontWeight: FontWeight.w600)),
+                          ],
+                        ),
+                      ),
+                    ],
+                    onChanged: (val) {
+                      setState(() {
+                        if (val == -1) {
+                          _isCustomWork = true;
+                          _selectedWorkTypeId = null;
+                          _rateController.clear();
+                        } else {
+                          _isCustomWork = false;
+                          _selectedWorkTypeId = val;
+                          try {
+                            final type = workProvider.workTypes.firstWhere((t) => t.id == val);
+                            _rateController.text = type.ratePerHour.toStringAsFixed(0);
+                            if (_startTime != null && _endTime != null) _calculateTotalTime();
+                          } catch (_) {}
+                        }
+                        if (!_isCustomWork) _customWorkNameController.clear();
+                      });
+                    },
+                  ),
+                ),
               ),
               const SizedBox(height: 16),
 
@@ -298,28 +373,32 @@ class _AddWorkScreenState extends State<AddWorkScreen> with SingleTickerProvider
                   controller: _customWorkNameController,
                   decoration: InputDecoration(
                     labelText: locale.translate('add_work.custom_work_name'), 
-                    prefixIcon: const Icon(Icons.edit), 
-                    border: const OutlineInputBorder(),
+                    prefixIcon: Icon(Icons.agriculture, color: Colors.blue.shade700), 
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: Colors.grey.shade300)),
+                    enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: Colors.grey.shade300)),
                     floatingLabelBehavior: FloatingLabelBehavior.always,
+                    filled: true,
+                    fillColor: Colors.white,
                   ),
                   validator: (val) => _isCustomWork && (val == null || val.trim().isEmpty) ? locale.translate('add_work.enter_custom_name_error') : null,
                 ),
                 const SizedBox(height: 16),
               ],
 
-              // 3. Start Time (Tappable Container)
-              _buildTimeContainer(locale.translate('add_work.start_time'), _startTime, () => _pickTime(true)),
+              // 3. Start Time & End Time Row
+              Row(
+                children: [
+                  Expanded(child: _buildTimeContainer(locale.translate('add_work.start_time'), _startTime, () => _pickTime(true))),
+                  const SizedBox(width: 12),
+                  Expanded(child: _buildTimeContainer(locale.translate('add_work.end_time'), _endTime, () => _pickTime(false))),
+                ],
+              ),
               const SizedBox(height: 16),
 
-              // 4. End Time (Tappable Container)
-              _buildTimeContainer(locale.translate('add_work.end_time'), _endTime, () => _pickTime(false)),
-              const SizedBox(height: 16),
-
-              // 5. Total Time
               // 5. Total Time
               Builder(
                 builder: (context) {
-                  String totalTimeText = '${locale.translate('add_work.total_time')}: --';
+                  String totalTimeText = '--';
                   
                   if (_startTime != null && _endTime != null) {
                     final now = DateTime.now();
@@ -335,36 +414,51 @@ class _AddWorkScreenState extends State<AddWorkScreen> with SingleTickerProvider
                     final minutes = durationInMinutes % 60;
                     
                     if (hours > 0 && minutes > 0) {
-                      totalTimeText = '${locale.translate('add_work.total_time')}: $hours ${locale.translate('add_work.hours')} $minutes ${locale.translate('add_work.minutes')}';
+                      totalTimeText = '$hours ${locale.translate('add_work.hours')} $minutes ${locale.translate('add_work.minutes')}';
                     } else if (hours > 0) {
-                      totalTimeText = '${locale.translate('add_work.total_time')}: $hours ${locale.translate('add_work.hours')}';
+                      totalTimeText = '$hours ${locale.translate('add_work.hours')}';
                     } else if (minutes > 0) {
-                      totalTimeText = '${locale.translate('add_work.total_time')}: $minutes ${locale.translate('add_work.minutes')}';
+                      totalTimeText = '$minutes ${locale.translate('add_work.minutes')}';
                     }
                   }
 
-                  return Column(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(14),
-                        decoration: BoxDecoration(color: Colors.green.shade50, borderRadius: BorderRadius.circular(8), border: Border.all(color: Colors.green.shade300)),
-                        child: Row(children: [const Icon(Icons.timer, color: Colors.green), const SizedBox(width: 10), Text(totalTimeText, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.green.shade800))]),
-                      ),
-                      const SizedBox(height: 16),
-                    ],
+                  return Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Colors.green.shade50, 
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: Colors.green.shade100),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(locale.translate('add_work.total_time'), style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: Colors.green.shade800)),
+                        Row(
+                          children: [
+                            Icon(Icons.timer, size: 18, color: Colors.green.shade700),
+                            const SizedBox(width: 8),
+                            Text(totalTimeText, style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.green.shade900)),
+                          ],
+                        ),
+                      ],
+                    ),
                   );
                 }
               ),
+              const SizedBox(height: 16),
 
               // 6. Rate
               TextFormField(
                 controller: _rateController,
                 decoration: InputDecoration(
                   labelText: locale.translate('add_work.rate_per_hour'), 
-                  prefixIcon: const Icon(Icons.currency_rupee), 
+                  prefixIcon: const Icon(Icons.payments_outlined), 
                   prefixText: '₹ ', 
-                  border: const OutlineInputBorder(),
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: Colors.grey.shade300)),
+                  enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: Colors.grey.shade300)),
                   floatingLabelBehavior: FloatingLabelBehavior.always,
+                  filled: true,
+                  fillColor: Colors.white,
                 ),
                 keyboardType: TextInputType.number,
                 inputFormatters: [FilteringTextInputFormatter.digitsOnly],
@@ -380,15 +474,16 @@ class _AddWorkScreenState extends State<AddWorkScreen> with SingleTickerProvider
                 controller: _amountController,
                 decoration: InputDecoration(
                   labelText: locale.translate('add_work.total_amount'), 
-                  prefixIcon: const Icon(Icons.account_balance_wallet), 
+                  prefixIcon: const Icon(Icons.wallet_rounded), 
                   prefixText: '₹ ', 
-                  border: const OutlineInputBorder(), 
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: Colors.grey.shade300)),
+                  enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: Colors.grey.shade300)),
                   filled: true, 
                   fillColor: const Color(0xFFE8F5E9),
                   floatingLabelBehavior: FloatingLabelBehavior.always,
                 ),
                 keyboardType: TextInputType.number,
-                style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 18, color: Colors.green),
+                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Colors.black87),
               ),
               const SizedBox(height: 16),
 
@@ -397,9 +492,12 @@ class _AddWorkScreenState extends State<AddWorkScreen> with SingleTickerProvider
                 controller: _notesController,
                 decoration: InputDecoration(
                   labelText: locale.translate('add_work.notes'), 
-                  prefixIcon: const Icon(Icons.note), 
-                  border: const OutlineInputBorder(),
+                  prefixIcon: const Icon(Icons.edit_note_rounded), 
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: Colors.grey.shade300)),
+                  enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: Colors.grey.shade300)),
                   floatingLabelBehavior: FloatingLabelBehavior.always,
+                  filled: true,
+                  fillColor: Colors.white,
                 ),
                 maxLines: 3,
               ),
@@ -431,22 +529,10 @@ class _AddWorkScreenState extends State<AddWorkScreen> with SingleTickerProvider
                   width: double.infinity,
                   child: ScaleButton(
                     onPressed: () async {
-                      final confirm = await showDialog<bool>(
-                        context: context,
-                        builder: (context) => AlertDialog(
-                          title: Text(locale.translate('farmer_profile.delete_work_title')),
-                          content: Text(locale.translate('farmer_profile.delete_work_message')),
-                          actions: [
-                            TextButton(
-                              onPressed: () => Navigator.pop(context, false),
-                              child: Text(locale.translate('common.cancel')),
-                            ),
-                            TextButton(
-                              onPressed: () => Navigator.pop(context, true),
-                              child: Text(locale.translate('common.delete'), style: const TextStyle(color: Colors.red)),
-                            ),
-                          ],
-                        ),
+                      final confirm = await showDeleteDialog(
+                        context,
+                        title: locale.translate('farmer_profile.delete_work_title'),
+                        content: locale.translate('farmer_profile.delete_work_message'),
                       );
                       
                       if (confirm == true) {
@@ -476,40 +562,69 @@ class _AddWorkScreenState extends State<AddWorkScreen> with SingleTickerProvider
           ),
         ),
       ),
+      ),
     );
   }
 
   /// A completely custom tappable container for time selection.
   /// NOT a text field.
   Widget _buildTimeContainer(String label, TimeOfDay? time, VoidCallback onTap) {
+    final isStart = label.contains('Start') || label.contains('शुरू');
+    final iconColor = isStart ? Colors.green.shade600 : Colors.red.shade600;
+    final icon = isStart ? Icons.play_circle_outline : Icons.stop_circle_outlined;
+    
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(8),
+      borderRadius: BorderRadius.circular(16),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        height: 95, 
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         decoration: BoxDecoration(
           color: Colors.white,
-          border: Border.all(color: Colors.grey.shade400),
-          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: Colors.grey.shade300),
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.03),
+              blurRadius: 4,
+              offset: const Offset(0, 2),
+            ),
+          ],
         ),
         child: Row(
           children: [
-            Icon(label.contains('Start') ? Icons.access_time : Icons.access_time_filled, color: Colors.grey[600]),
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: iconColor.withValues(alpha: 0.1),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(icon, color: iconColor, size: 24),
+            ),
             const SizedBox(width: 12),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text(label, style: TextStyle(fontSize: 12, color: Colors.grey[700], fontWeight: FontWeight.w500)),
+                  Text(label, style: TextStyle(fontSize: 12, color: Colors.grey[600], fontWeight: FontWeight.w500)),
                   const SizedBox(height: 4),
-                  Text(
-                    time != null ? _formatTime(time) : 'Tap to select',
-                    style: TextStyle(fontSize: 18, color: time != null ? Colors.black : Colors.grey[500], fontWeight: FontWeight.w600),
+                  FittedBox(
+                    fit: BoxFit.scaleDown,
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      time != null ? _formatTime(time) : '--:--',
+                      style: TextStyle(
+                        fontSize: 18, 
+                        color: time != null ? Colors.black87 : Colors.grey[400], 
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
                   ),
                 ],
               ),
             ),
-            const Icon(Icons.arrow_drop_down, color: Colors.grey),
           ],
         ),
       ),

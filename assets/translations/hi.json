@@ -22,6 +22,7 @@
     },
     "login": {
         "welcome": "ट्रैक्टर खाता में आपका स्वागत है",
+        "sign_in": "लॉगिन करें",
         "sign_in_google": "Google से लॉगिन करें",
         "sign_in_failed": "लॉगिन नहीं हुआ। फिर से कोशिश करें।"
     },
@@ -54,7 +55,7 @@
         "pending": "बाकी",
         "received": "मिला",
         "no_history": "अभी तक कोई हिसाब नहीं।",
-        "receive_payment": "पेमेंट लें",
+        "receive_payment": "प्राप्त रुपये",
         "add_work": "काम जोड़ें",
         "payment_received": "पेमेंट मिल गया",
         "delete_work_title": "काम हटाएं?",
@@ -116,7 +117,7 @@
         "manage_rate_card": "रेट कार्ड",
         "rate_card_subtitle": "अलग-अलग कामों की रेट सेट करें",
         "about": "ऐप के बारे में",
-        "version": "वर्शन 1.1.0",
+        "version": "वर्शन 1.2.0",
         "made_by": "Made by",
         "logout": "लॉगआउट",
         "logout_confirm_title": "लॉगआउट करें?",

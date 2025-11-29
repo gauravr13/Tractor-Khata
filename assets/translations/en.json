@@ -22,6 +22,7 @@
     },
     "login": {
         "welcome": "Welcome to Tractor Khata",
+        "sign_in": "Login",
         "sign_in_google": "Sign in with Google",
         "sign_in_failed": "Sign in failed. Please try again."
     },
@@ -54,9 +55,9 @@
         "pending": "Pending",
         "received": "Received",
         "no_history": "No history yet.",
-        "receive_payment": "Receive Payment",
+        "receive_payment": "Received Money",
         "add_work": "Add Work",
-        "payment_received": "Payment Received",
+        "payment_received": "Received Money",
         "delete_work_title": "Delete Work?",
         "delete_work_message": "Are you sure you want to delete this work entry?",
         "delete_payment_title": "Delete Payment?",
@@ -116,7 +117,7 @@
         "manage_rate_card": "Manage Rate Card",
         "rate_card_subtitle": "Set rates for different work types",
         "about": "About",
-        "version": "Version 1.1.0",
+        "version": "Version 1.2.0",
         "made_by": "Made by",
         "logout": "Logout",
         "logout_confirm_title": "Logout?",

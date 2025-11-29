@@ -5,6 +5,7 @@ import '../database/database.dart';
 import '../providers/farmer_provider.dart';
 import '../services/localization_service.dart';
 import '../widgets/scale_button.dart';
+import '../widgets/animated_bottom_sheet.dart';
 
 class AddFarmerScreen extends StatefulWidget {
   final Farmer? farmerToEdit;
@@ -103,10 +104,11 @@ class _AddFarmerScreenState extends State<AddFarmerScreen> {
             decoration: InputDecoration(
               labelText: locale.translate('add_farmer.name_label'),
               hintText: locale.translate('add_farmer.name_hint'),
-              prefixIcon: const Icon(Icons.person),
+              prefixIcon: const Icon(Icons.person_rounded),
               border: const OutlineInputBorder(),
             ),
             textCapitalization: TextCapitalization.words,
+            textInputAction: TextInputAction.next,
             style: const TextStyle(fontSize: 16),
             validator: (value) {
               if (value == null || value.trim().isEmpty) {
@@ -122,20 +124,22 @@ class _AddFarmerScreenState extends State<AddFarmerScreen> {
             decoration: InputDecoration(
               labelText: locale.translate('add_farmer.phone_label'),
               hintText: locale.translate('add_farmer.phone_hint'),
-              prefixIcon: const Icon(Icons.phone),
+              prefixIcon: const Icon(Icons.phone_rounded),
               border: const OutlineInputBorder(),
             ),
             style: const TextStyle(fontSize: 16),
             keyboardType: TextInputType.phone,
+            textInputAction: TextInputAction.next,
           ),
           const SizedBox(height: 16),
           
           TextFormField(
             controller: _notesController,
+            textCapitalization: TextCapitalization.sentences,
             decoration: InputDecoration(
               labelText: locale.translate('add_farmer.notes_label'),
               hintText: locale.translate('add_farmer.notes_hint'),
-              prefixIcon: const Icon(Icons.note),
+              prefixIcon: const Icon(Icons.edit_note_rounded),
               border: const OutlineInputBorder(),
             ),
             style: const TextStyle(fontSize: 16),
@@ -176,30 +180,56 @@ class _AddFarmerScreenState extends State<AddFarmerScreen> {
     );
 
     if (widget.isBottomSheet) {
-      return Padding(
-        padding: EdgeInsets.only(
-          bottom: MediaQuery.of(context).viewInsets.bottom,
-          left: 16,
-          right: 16,
-          top: 16,
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 40,
-              height: 4,
-              margin: const EdgeInsets.only(bottom: 20),
-              decoration: BoxDecoration(
-                color: Colors.grey[300],
-                borderRadius: BorderRadius.circular(2),
+      return AnimatedBottomSheetContent(
+        child: Container(
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+          ),
+          child: SafeArea(
+            child: Padding(
+              padding: EdgeInsets.only(
+                bottom: MediaQuery.of(context).viewInsets.bottom + 16, // Keyboard + padding
+                left: 20,
+                right: 20,
+                top: 12,
+              ),
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Drag Handle
+                    Center(
+                      child: Container(
+                        width: 48,
+                        height: 5,
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade300,
+                          borderRadius: BorderRadius.circular(2.5),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    
+                    // Title
+                    Text(
+                      title,
+                      style: const TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.black87,
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    
+                    // Form Content
+                    formContent,
+                    const SizedBox(height: 8),
+                  ],
+                ),
               ),
             ),
-            Text(title, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 20),
-            formContent,
-            const SizedBox(height: 20),
-          ],
+          ),
         ),
       );
     }
@@ -208,9 +238,11 @@ class _AddFarmerScreenState extends State<AddFarmerScreen> {
       appBar: AppBar(
         title: Text(title),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: ListView(children: [formContent]),
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: ListView(children: [formContent]),
+        ),
       ),
     );
   }

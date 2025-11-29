@@ -1,13 +1,13 @@
-# Tractor Khata V1.1.0 - First Release
+# Tractor Khata V1.2.0 - Release
 
-**Build Date:** November 25, 2025
-**Version:** 1.1.0
+**Build Date:** November 28, 2025
+**Version:** 1.2.0
 **Developer:** Gaurav Raikwar
 
 ---
 
 ## 📦 Package Contents
-- **TractorKhata_v1.1.apk**: The main application file for Android devices.
+- **TractorKhata_v1.2.apk**: The main application file for Android devices.
 
 ## 🚀 Installation
 1. Transfer the `.apk` file to your Android phone/tablet.

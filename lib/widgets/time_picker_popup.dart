@@ -1,305 +1,285 @@
-// =============================================================================
-// PROJECT: Tractor Khata
-// FILE: time_picker_popup.dart
-// DESCRIPTION:
-// A custom, modern 12-hour time picker widget.
-// Features:
-// 1. iOS-style scroll wheels for Hour and Minute selection.
-// 2. Segmented control for AM/PM toggling.
-// 3. Smooth animations and haptic feedback for better UX.
-// 4. Localized labels (AM/PM, Select Time, etc.).
-// =============================================================================
-
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import '../services/localization_service.dart';
+import 'package:flutter/cupertino.dart';
 
-/// ---------------------------------------------------------------------------
-/// Widget: TimePickerPopup
-/// Purpose: Displays a dialog for selecting time (Hour, Minute, AM/PM).
-/// ---------------------------------------------------------------------------
+/// Non-editable time picker with wheel selectors
+/// Hour (1-12), Minute (00-59), AM/PM toggle
 class TimePickerPopup extends StatefulWidget {
-  final TimeOfDay? initialTime;
-
-  const TimePickerPopup({super.key, this.initialTime});
-
+  final TimeOfDay initialTime;
+  final bool isHindi;
+  
+  const TimePickerPopup({
+    super.key,
+    required this.initialTime,
+    this.isHindi = true,
+  });
+  
   @override
   State<TimePickerPopup> createState() => _TimePickerPopupState();
 }
 
 class _TimePickerPopupState extends State<TimePickerPopup> {
-  late int _hour;
-  late int _minute;
-  late String _period;
-
+  late int selectedHour;
+  late int selectedMinute;
+  late bool isAM;
+  
   @override
   void initState() {
     super.initState();
-    // Initialize with provided time or current time
-    final now = TimeOfDay.now();
-    final init = widget.initialTime ?? now;
-    
-    // Convert 24h format to 12h format for the UI
-    _hour = init.hourOfPeriod == 0 ? 12 : init.hourOfPeriod;
-    _minute = init.minute;
-    _period = init.period == DayPeriod.am ? 'AM' : 'PM';
+    selectedHour = widget.initialTime.hourOfPeriod == 0 ? 12 : widget.initialTime.hourOfPeriod;
+    selectedMinute = widget.initialTime.minute;
+    isAM = widget.initialTime.period == DayPeriod.am;
   }
-
+  
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final primaryColor = theme.primaryColor;
-    final locale = AppLocalizations.of(context)!;
-
-    return Dialog(
-      backgroundColor: Colors.transparent,
-      insetPadding: const EdgeInsets.all(20),
-      child: Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(28),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.15),
-              blurRadius: 16,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        padding: const EdgeInsets.all(24),
+    return Container(
+      height: 420,
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      child: SafeArea(
+        top: false,
         child: Column(
-          mainAxisSize: MainAxisSize.min,
           children: [
-            // --- Title ---
-            Text(
-              locale.translate('time_picker.select_time'),
-              style: theme.textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.w600,
-                color: Colors.black87,
-                letterSpacing: 0.5,
+            // Drag handle
+            Center(
+              child: Container(
+                margin: const EdgeInsets.only(top: 12, bottom: 16),
+                width: 48,
+                height: 5,
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade300,
+                  borderRadius: BorderRadius.circular(2.5),
+                ),
               ),
             ),
-            const SizedBox(height: 32),
-
-            // --- Wheel Pickers (Hour : Minute) ---
-            SizedBox(
-              height: 160,
-              child: Stack(
-                alignment: Alignment.center,
-                children: [
-                  // Highlight Bar (Selection Indicator)
-                  Container(
-                    height: 50,
-                    margin: const EdgeInsets.symmetric(horizontal: 16),
-                    decoration: BoxDecoration(
-                      color: primaryColor.withValues(alpha: 0.08),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  // Wheels Row
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      // Hour Wheel
-                      _buildWheel(
-                        min: 1,
-                        max: 12,
-                        current: _hour,
-                        onChanged: (val) => setState(() => _hour = val),
-                        width: 70,
+            
+            // Title
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+              child: Text(
+                widget.isHindi ? 'समय चुनें' : 'Select Time',
+                style: const TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.black87,
+                ),
+              ),
+            ),
+            
+            const SizedBox(height: 16),
+            
+            // Time selectors container
+            Expanded(
+              child: Container(
+                margin: const EdgeInsets.symmetric(horizontal: 20),
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade50,
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: Colors.grey.shade200, width: 1.5),
+                ),
+                child: Row(
+                  children: [
+                    // Hour picker
+                    Expanded(
+                      child: CupertinoPicker(
+                        scrollController: FixedExtentScrollController(
+                          initialItem: selectedHour - 1,
+                        ),
+                        itemExtent: 56,
+                        onSelectedItemChanged: (index) {
+                          setState(() => selectedHour = index + 1);
+                        },
+                        children: List.generate(12, (index) {
+                          return Center(
+                            child: Text(
+                              '${index + 1}',
+                              style: const TextStyle(
+                                fontSize: 32,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.black87,
+                              ),
+                            ),
+                          );
+                        }),
                       ),
-                      // Separator Colon
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 8),
-                        child: Text(
-                          ':',
-                          style: TextStyle(
-                            fontSize: 32,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.grey.shade400,
-                            height: 1.0, 
-                          ),
+                    ),
+                    
+                    // Separator
+                    const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 4),
+                      child: Text(
+                        ':',
+                        style: TextStyle(
+                          fontSize: 36,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black54,
                         ),
                       ),
-                      // Minute Wheel
-                      _buildWheel(
-                        min: 0,
-                        max: 59,
-                        current: _minute,
-                        onChanged: (val) => setState(() => _minute = val),
-                        width: 70,
-                        padZero: true,
+                    ),
+                    
+                    // Minute picker
+                    Expanded(
+                      child: CupertinoPicker(
+                        scrollController: FixedExtentScrollController(
+                          initialItem: selectedMinute,
+                        ),
+                        itemExtent: 56,
+                        onSelectedItemChanged: (index) {
+                          setState(() => selectedMinute = index);
+                        },
+                        children: List.generate(60, (index) {
+                          return Center(
+                            child: Text(
+                              index.toString().padLeft(2, '0'),
+                              style: const TextStyle(
+                                fontSize: 32,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.black87,
+                              ),
+                            ),
+                          );
+                        }),
                       ),
-                    ],
+                    ),
+                    
+                    const SizedBox(width: 8),
+                    
+                    // AM/PM selector
+                    Container(
+                      width: 80,
+                      padding: const EdgeInsets.symmetric(vertical: 24),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          _buildPeriodButton('AM', isAM),
+                          const SizedBox(height: 16),
+                          _buildPeriodButton('PM', !isAM),
+                        ],
+                      ),
+                    ),
+                    
+                    const SizedBox(width: 8),
+                  ],
+                ),
+              ),
+            ),
+            
+            const SizedBox(height: 24),
+            
+            // Action buttons
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () => Navigator.pop(context),
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 18),
+                        side: BorderSide(color: Colors.grey.shade300, width: 1.5),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                      ),
+                      child: Text(
+                        widget.isHindi ? 'रद्द करें' : 'Cancel',
+                        style: const TextStyle(
+                          fontSize: 17,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.black54,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () {
+                        int hour24 = selectedHour == 12 ? 0 : selectedHour;
+                        if (!isAM) hour24 += 12;
+                        if (hour24 == 24) hour24 = 12;
+                        
+                        final time = TimeOfDay(hour: hour24, minute: selectedMinute);
+                        Navigator.pop(context, time);
+                      },
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 18),
+                        backgroundColor: Colors.green,
+                        foregroundColor: Colors.white,
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                      ),
+                      child: Text(
+                        widget.isHindi ? 'ठीक है' : 'OK',
+                        style: const TextStyle(
+                          fontSize: 17,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
                   ),
                 ],
               ),
             ),
-            const SizedBox(height: 24),
-
-            // --- AM/PM Segment Control ---
-            _buildAmPmSegment(primaryColor, locale),
-            const SizedBox(height: 32),
-
-            // --- Action Buttons (Cancel / OK) ---
-            _buildActionButtons(context, primaryColor, locale),
           ],
         ),
       ),
     );
   }
-
-  /// Helper: Builds the Action Buttons Row
-  Widget _buildActionButtons(BuildContext context, Color primaryColor, AppLocalizations locale) {
-    return Row(
-      children: [
-        // Cancel Button
-        Expanded(
-          child: TextButton(
-            onPressed: () {
-              HapticFeedback.mediumImpact();
-              Navigator.of(context).pop();
-            },
-            style: TextButton.styleFrom(
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-              foregroundColor: Colors.grey.shade600,
-            ),
-            child: Text(
-              locale.translate('time_picker.cancel'),
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-            ),
+  
+  Widget _buildPeriodButton(String label, bool isSelected) {
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          isAM = label == 'AM';
+        });
+      },
+      child: Container(
+        width: 64,
+        height: 60,
+        decoration: BoxDecoration(
+          color: isSelected ? Colors.green : Colors.transparent,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(
+            color: isSelected ? Colors.green : Colors.grey.shade300,
+            width: 2,
           ),
         ),
-        const SizedBox(width: 16),
-        // OK Button
-        Expanded(
-          child: ElevatedButton(
-            onPressed: () {
-              HapticFeedback.heavyImpact();
-              // Convert back to TimeOfDay (24h format)
-              final time = TimeOfDay(
-                hour: _period == 'AM'
-                    ? (_hour == 12 ? 0 : _hour)
-                    : (_hour == 12 ? 12 : _hour + 12),
-                minute: _minute,
-              );
-              Navigator.of(context).pop(time);
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: primaryColor,
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              elevation: 0,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-            ),
-            child: Text(
-              locale.translate('time_picker.ok'),
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.white),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  /// Helper: Builds a scrollable wheel for numbers
-  Widget _buildWheel({
-    required int min,
-    required int max,
-    required int current,
-    required Function(int) onChanged,
-    required double width,
-    bool padZero = false,
-  }) {
-    return SizedBox(
-      width: width,
-      height: 160,
-      child: ListWheelScrollView.useDelegate(
-        itemExtent: 50,
-        perspective: 0.002, // Slight 3D effect
-        diameterRatio: 1.5,
-        physics: const FixedExtentScrollPhysics(),
-        useMagnifier: true,
-        magnification: 1.1,
-        controller: FixedExtentScrollController(initialItem: current - min),
-        onSelectedItemChanged: (index) {
-          HapticFeedback.selectionClick();
-          onChanged(min + index);
-        },
-        childDelegate: ListWheelChildBuilderDelegate(
-          builder: (context, index) {
-            final val = min + index;
-            final isSelected = val == current;
-            return Center(
-              child: AnimatedDefaultTextStyle(
-                duration: const Duration(milliseconds: 150),
-                style: TextStyle(
-                  fontSize: isSelected ? 26 : 20,
-                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-                  color: isSelected ? Theme.of(context).primaryColor : Colors.grey.shade300,
-                ),
-                child: Text(
-                  padZero ? val.toString().padLeft(2, '0') : val.toString(),
-                ),
-              ),
-            );
-          },
-          childCount: max - min + 1,
-        ),
-      ),
-    );
-  }
-
-  /// Helper: Builds the AM/PM toggle switch
-  Widget _buildAmPmSegment(Color primaryColor, AppLocalizations locale) {
-    return Container(
-      height: 48,
-      width: double.infinity, // Make it responsive
-      constraints: const BoxConstraints(maxWidth: 300), // Limit max width
-      decoration: BoxDecoration(
-        color: Colors.grey.shade100,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade200),
-      ),
-      child: Row(
-        children: [
-          _buildSegmentOption(locale.translate('time_picker.am'), 'AM', primaryColor),
-          _buildSegmentOption(locale.translate('time_picker.pm'), 'PM', primaryColor),
-        ],
-      ),
-    );
-  }
-
-  /// Helper: Builds a single option in the AM/PM segment
-  Widget _buildSegmentOption(String label, String value, Color primaryColor) {
-    final isSelected = _period == value;
-    return Expanded(
-      child: GestureDetector(
-        onTap: () {
-          HapticFeedback.mediumImpact();
-          setState(() => _period = value);
-        },
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
-          margin: const EdgeInsets.all(4),
-          decoration: BoxDecoration(
-            color: isSelected ? primaryColor : Colors.transparent,
-            borderRadius: BorderRadius.circular(8),
-            boxShadow: isSelected
-                ? [BoxShadow(color: primaryColor.withValues(alpha: 0.3), blurRadius: 4, offset: const Offset(0, 2))]
-                : null,
-          ),
-          alignment: Alignment.center,
+        child: Center(
           child: Text(
             label,
             style: TextStyle(
-              fontSize: 16,
+              fontSize: 20,
               fontWeight: FontWeight.w600,
-              color: isSelected ? Colors.white : Colors.grey.shade600,
+              color: isSelected ? Colors.white : Colors.black54,
             ),
           ),
         ),
       ),
     );
   }
+}
+
+/// Show time picker popup
+Future<TimeOfDay?> showTimePickerPopup({
+  required BuildContext context,
+  required TimeOfDay initialTime,
+  bool isHindi = true,
+}) async {
+  return await showModalBottomSheet<TimeOfDay>(
+    context: context,
+    backgroundColor: Colors.transparent,
+    barrierColor: Colors.black.withOpacity(0.4),
+    isScrollControlled: true,
+    isDismissible: true,
+    enableDrag: true,
+    builder: (context) => TimePickerPopup(
+      initialTime: initialTime,
+      isHindi: isHindi,
+    ),
+  );
 }

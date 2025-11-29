@@ -29,8 +29,8 @@ class _ScaleButtonState extends State<ScaleButton> with SingleTickerProviderStat
       vsync: this,
       duration: widget.duration,
     );
-    _scaleAnimation = Tween<double>(begin: 1.0, end: 1.0 + widget.scaleAmount).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
+    _scaleAnimation = Tween<double>(begin: 1.0, end: 1.0 - widget.scaleAmount).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.fastOutSlowIn),
     );
   }
 

@@ -48,20 +48,21 @@ void main() async {
   // Ensure Flutter bindings are initialized before calling native code
   WidgetsFlutterBinding.ensureInitialized();
   
-  // Initialize critical services in parallel to optimize startup time
-  final initFutures = await Future.wait([
-    Firebase.initializeApp(),
-    SharedPreferences.getInstance(),
-  ]);
-  
-  // Extract SharedPreferences instance
-  final prefs = initFutures[1] as SharedPreferences;
+  // Initialize Firebase safely
+  try {
+    if (Firebase.apps.isEmpty) {
+      await Firebase.initializeApp();
+    }
+  } catch (e) {
+    debugPrint('Firebase initialization failed: $e');
+  }
+
+  // Initialize other services
+  final prefs = await SharedPreferences.getInstance();
+  await initializeDateFormatting(null, null);
   
   // Load saved language preference (Default: Hindi 'hi')
   final languageCode = prefs.getString('selected_locale') ?? 'hi';
-  
-  // Initialize date formatting for localization (Required for Hindi dates)
-  await initializeDateFormatting(null, null);
 
   // Initialize Local Database (Drift/SQLite)
   final database = AppDatabase();
@@ -114,8 +115,14 @@ class TractorKhataApp extends StatelessWidget {
           
           // --- Theme Configuration ---
           theme: ThemeData(
-            primarySwatch: Colors.green,
             useMaterial3: true,
+            colorScheme: ColorScheme.fromSeed(
+              seedColor: Colors.green,
+              primary: Colors.green,
+              secondary: Colors.greenAccent,
+              surface: Colors.white,
+              surfaceTint: Colors.transparent,
+            ),
             scaffoldBackgroundColor: Colors.grey[50],
             
             textTheme: GoogleFonts.poppinsTextTheme(Theme.of(context).textTheme).apply(
@@ -123,7 +130,6 @@ class TractorKhataApp extends StatelessWidget {
               displayColor: Colors.black87,
             ),
             
-            // Global Page Transitions (Fade + Slide Up - Material 3 Style)
             pageTransitionsTheme: PageTransitionsTheme(
               builders: {
                 TargetPlatform.android: FadeSlideUpTransitionBuilder(),
@@ -138,6 +144,53 @@ class TractorKhataApp extends StatelessWidget {
               centerTitle: true,
             ),
             
+            cardTheme: CardThemeData(
+              color: Colors.white,
+              surfaceTintColor: Colors.transparent,
+              elevation: 0,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+                side: BorderSide(color: Colors.grey.shade200),
+              ),
+            ),
+            
+            dialogTheme: const DialogThemeData(
+              backgroundColor: Colors.white,
+              surfaceTintColor: Colors.transparent,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(16))),
+            ),
+            
+            datePickerTheme: DatePickerThemeData(
+              backgroundColor: Colors.white,
+              surfaceTintColor: Colors.transparent,
+              headerBackgroundColor: Colors.green,
+              headerForegroundColor: Colors.white,
+              dayStyle: GoogleFonts.poppins(),
+              yearStyle: GoogleFonts.poppins(),
+            ),
+            
+            timePickerTheme: TimePickerThemeData(
+              backgroundColor: Colors.white,
+              dayPeriodColor: Colors.green.shade50,
+              hourMinuteColor: Colors.grey.shade100,
+              hourMinuteTextColor: Colors.black87,
+              dialHandColor: Colors.green,
+              dialBackgroundColor: Colors.grey.shade100,
+            ),
+            
+            popupMenuTheme: const PopupMenuThemeData(
+              color: Colors.white,
+              surfaceTintColor: Colors.transparent,
+              elevation: 4,
+            ),
+            
+            dropdownMenuTheme: const DropdownMenuThemeData(
+              menuStyle: MenuStyle(
+                backgroundColor: WidgetStatePropertyAll(Colors.white),
+                surfaceTintColor: WidgetStatePropertyAll(Colors.transparent),
+              ),
+            ),
+
             elevatedButtonTheme: ElevatedButtonThemeData(
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.green,

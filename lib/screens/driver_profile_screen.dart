@@ -111,6 +111,8 @@ class DriverProfileScreen extends StatelessWidget {
 
   Widget _buildInfoCard({required IconData icon, required String label, required String value}) {
     return Card(
+      color: Colors.white,
+      surfaceTintColor: Colors.transparent,
       margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
       elevation: 2,
       child: ListTile(
